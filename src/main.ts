@@ -7,6 +7,14 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Render (وأي PaaS مشابه) يمرّر الطلبات عبر بروكسي عكسي واحد — بدون هذا الإعداد يقرأ Express
+  // عنوان IP البروكسي الداخلي نفسه لكل الزوّار، فيرى ThrottlerGuard (المعتمِد على req.ip
+  // افتراضيًا) كل مستخدمي الموقع كعميل واحد ويُطبَّق حد التسجيل/الدخول تراكميًا عليهم مجتمعين
+  // بدل كل شخص على حدة — هذا هو السبب الجذري الحقيقي لرسالة "تجاوزت الحد المسموح" المتكررة،
+  // لا ضيق الحدود نفسها. trust proxy=1 يجعل Express يثق بأول قفزة بروكسي فقط (X-Forwarded-For)
+  // ويستخرج عنوان IP الزائر الحقيقي، فيعمل الحد بشكل صحيح لكل مستخدم على حدة كما صُمِّم أصلًا
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
   app.use(
     helmet({
       // 'unsafe-inline' على scriptSrc/styleSrc ضروري لـNext.js (hydration inline + Google
