@@ -36,7 +36,7 @@ export function SubscriptionsContent() {
           <Badge tone="primary" className="mx-auto sm:mx-0">
             دعم مستمر لرحلتك
           </Badge>
-          <h1 className="mt-3 text-2xl font-extrabold text-foreground sm:text-3xl">الخدمات الإضافية</h1>
+          <h1 className="mt-3 text-2xl font-extrabold text-foreground sm:text-3xl">الاشتراكات</h1>
         </div>
       </div>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted sm:text-base">
