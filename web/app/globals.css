@@ -1,0 +1,154 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fff0f5;
+  --surface: #ffffff;
+  --foreground: #2b2420;
+  --muted: #7a7166;
+
+  /* الهوية البصرية الجديدة (وردي داكن نابض) — يحل محل الوردي الباهت السابق، ويسري
+     تلقائيًا على كل استخدام حالي لأصناف primary (خلفية أو نص أو حدود) في الموقع
+     لأن نفس أسماء الدرجات (50-900) محفوظة، فقط قيمها تغيّرت */
+  --color-primary-50: #fce4ec;
+  --color-primary-100: #fbc8dc;
+  --color-primary-200: #f79fc4;
+  --color-primary-300: #f274ab;
+  --color-primary-400: #ed4a93;
+  --color-primary-500: #e91e8c;
+  --color-primary-600: #c2185b;
+  --color-primary-700: #9e1449;
+  --color-primary-800: #7a0f38;
+  --color-primary-900: #560a27;
+
+  /* accent (تركواز) محفوظ دون تغيير عمدًا في هذه الدفعة — مستخدم في مواضع أخرى غير
+     الدولا (بطاقة "health" في المسارات، تنبيهات info...) لم يطلب العميل إعادة تصميمها الآن */
+  --color-accent-50: #eef7fb;
+  --color-accent-100: #d9edf5;
+  --color-accent-200: #b6dcec;
+  --color-accent-300: #8bc5df;
+  --color-accent-400: #5ea9cc;
+  --color-accent-500: #3d8bb3;
+  --color-accent-600: #2c6f93;
+  --color-accent-700: #245876;
+  --color-accent-800: #1f4760;
+  --color-accent-900: #1b3b4f;
+
+  /* بنفسجي جديد مخصص للدولا الرقمية وعناصر ثانوية مستقبلية — نطاق منفصل عمدًا عن
+     accent (تركواز) وعن Button.tsx's variant="secondary" (لا تزال accent) تجنّبًا للالتباس؛
+     القيم مطابقة لدرجة violet القياسية في Tailwind لأن 7C3AED هي violet-600 بالضبط */
+  --color-doula-50: #f5f3ff;
+  --color-doula-100: #ede9fe;
+  --color-doula-200: #ddd6fe;
+  --color-doula-300: #c4b5fd;
+  --color-doula-400: #a78bfa;
+  --color-doula-500: #8b5cf6;
+  --color-doula-600: #7c3aed;
+  --color-doula-700: #6d28d9;
+  --color-doula-800: #5b21b6;
+  --color-doula-900: #4c1d95;
+
+  --radius-card: 1.25rem;
+  --shadow-soft: 0 4px 24px -4px rgb(43 36 32 / 0.08), 0 2px 8px -2px rgb(43 36 32 / 0.05);
+  --gradient-primary: linear-gradient(135deg, #e91e8c 0%, #ff6b9d 100%);
+  --gradient-doula: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+
+  --color-primary-50: var(--color-primary-50);
+  --color-primary-100: var(--color-primary-100);
+  --color-primary-200: var(--color-primary-200);
+  --color-primary-300: var(--color-primary-300);
+  --color-primary-400: var(--color-primary-400);
+  --color-primary-500: var(--color-primary-500);
+  --color-primary-600: var(--color-primary-600);
+  --color-primary-700: var(--color-primary-700);
+  --color-primary-800: var(--color-primary-800);
+  --color-primary-900: var(--color-primary-900);
+
+  --color-accent-50: var(--color-accent-50);
+  --color-accent-100: var(--color-accent-100);
+  --color-accent-200: var(--color-accent-200);
+  --color-accent-300: var(--color-accent-300);
+  --color-accent-400: var(--color-accent-400);
+  --color-accent-500: var(--color-accent-500);
+  --color-accent-600: var(--color-accent-600);
+  --color-accent-700: var(--color-accent-700);
+  --color-accent-800: var(--color-accent-800);
+  --color-accent-900: var(--color-accent-900);
+
+  --color-doula-50: var(--color-doula-50);
+  --color-doula-100: var(--color-doula-100);
+  --color-doula-200: var(--color-doula-200);
+  --color-doula-300: var(--color-doula-300);
+  --color-doula-400: var(--color-doula-400);
+  --color-doula-500: var(--color-doula-500);
+  --color-doula-600: var(--color-doula-600);
+  --color-doula-700: var(--color-doula-700);
+  --color-doula-800: var(--color-doula-800);
+  --color-doula-900: var(--color-doula-900);
+
+  --font-sans: var(--font-cairo);
+
+  --radius-card: var(--radius-card);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+::selection {
+  background: var(--color-primary-200);
+  color: var(--color-primary-900);
+}
+
+/* حركات زخرفية خفيفة بـ CSS (يُنفَّذها المتصفح على مسرّع الرسوميات، بلا أي تكلفة JS
+   مستمرة على عكس framer-motion لعناصر تتحرك إلى ما لا نهاية) */
+@keyframes gentle-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+@keyframes heart-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.18);
+  }
+}
+
+.animate-gentle-breathe {
+  animation: gentle-breathe 4.5s ease-in-out infinite;
+}
+
+.animate-heart-pulse {
+  animation: heart-pulse 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-gentle-breathe,
+  .animate-heart-pulse {
+    animation: none;
+  }
+}
+
+/* تدرجات الهوية الجديدة — للأزرار والبطاقات المميزة (وردي)، ولرأس الدولا (بنفسجي) */
+.bg-gradient-primary {
+  background-image: var(--gradient-primary);
+}
+
+.bg-gradient-doula {
+  background-image: var(--gradient-doula);
+}

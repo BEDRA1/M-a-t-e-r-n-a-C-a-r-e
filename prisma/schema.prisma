@@ -1,0 +1,1058 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  mother
+  spouse
+  admin
+  specialist
+}
+
+enum PregnancyCalcMethod {
+  lmp
+  ovulation
+  ultrasound
+}
+
+enum PregnancyStatus {
+  active
+  completed
+  ended
+}
+
+enum DeliveryType {
+  natural
+  cesarean
+}
+
+enum ReminderType {
+  vitamin
+  medication
+  water
+  appointment
+  other
+}
+
+enum AssessmentDomainName {
+  // القيم الخمسة القديمة تبقى فقط لتوافق النتائج التاريخية الموجودة فعلاً في الجدول —
+  // لم تعد قابلة للاختيار في تقييمات جديدة (يُمنع ذلك صراحةً في AssessmentsService.submit)
+  anxiety
+  depression
+  stress
+  pressure
+  sleep
+  // المقياسان المعياريان الفعليان من الآن فصاعداً
+  gad7
+  epds
+}
+
+enum AssessmentClassification {
+  // تصنيفات النظام القديم المبسّط (تاريخية فقط)
+  low
+  medium
+  high
+  // تصنيف GAD-7 الرسمي (4 مستويات)
+  minimal
+  mild
+  moderate
+  severe
+  // تصنيف EPDS الرسمي: يُعاد استخدام low وhigh أعلاه لأنهما يطابقان معناهما تمامًا
+  // (0-9 منخفض، 13-30 مرتفع)، ويُضاف هنا فقط المستوى الأوسط الخاص بـEPDS
+  needs_followup
+}
+
+enum NotificationType {
+  booking_confirmed
+  appointment_reminder
+  general
+}
+
+enum SpecialistStatus {
+  pending
+  approved
+  rejected
+}
+
+enum ConsultationType {
+  in_person
+  remote
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  completed
+  cancelled
+}
+
+enum PaymentMethod {
+  card
+  ccp
+  baridimob
+  pay_at_attendance
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  failed
+  free_with_subscription
+}
+
+enum SubscriptionType {
+  monthly
+  one_time
+}
+
+enum SubscriptionStatus {
+  active
+  expired
+  cancelled
+}
+
+// اسم مختلف عمدًا عن PaymentMethod الموجود أعلاه (خاص بحجوزات الاستشارات: card/ccp/baridimob/pay_at_attendance)
+// لتفادي تعارض اسم enum — هذا خاص بطرق الدفع التي تدعمها طبقة محاكاة الدفع (src/payments) للاشتراكات فقط.
+enum SubscriptionPaymentMethod {
+  visa
+  baridimob
+}
+
+// اسم مختلف عمدًا عن PaymentStatus الموجود أعلاه لنفس السبب — خاص بحالة معاملة دفع الاشتراك.
+enum TransactionStatus {
+  pending
+  succeeded
+  failed
+}
+
+enum SettlementStatus {
+  pending
+  paid
+}
+
+model User {
+  id           String   @id @default(uuid())
+  phone        String   @unique
+  email        String?
+  passwordHash String   @map("password_hash")
+  role         UserRole
+  wilaya       String?
+  dateOfBirth  DateTime? @map("date_of_birth")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  motherOfFamily Family?        @relation("MotherFamily")
+  spouseOfFamily Family?        @relation("SpouseFamily")
+  pregnancies    Pregnancy[]
+  reminders      Reminder[]
+  refreshTokens  RefreshToken[]
+  assessmentResults AssessmentResult[]
+  urgentHelpRequests UrgentHelpRequest[]
+  notifications     Notification[]
+  specialistProfile Specialist?
+  bookingsMade      Booking[]
+  subscriptions     UserSubscription[]
+  postpartumPeriods PostpartumPeriod[]
+  moodLogs          MoodLog[]
+  testimonials      Testimonial[]
+  courseEnrollments CourseEnrollment[]
+  mealOrders        MealOrder[]
+  serviceBookings   ServiceBooking[]
+  productOrders     ProductOrder[]
+  adminProfile      AdminProfile?
+  auditLogs         AdminAuditLog[]
+  dataSharingSettings PatientDataSharing[]
+  clinicalNotesAbout  ClinicalNote[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  tokenHash String   @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model Family {
+  id           String   @id @default(uuid())
+  motherUserId String   @unique @map("mother_user_id")
+  spouseUserId String?  @unique @map("spouse_user_id")
+  inviteCode   String   @unique @map("invite_code")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  mother User  @relation("MotherFamily", fields: [motherUserId], references: [id])
+  spouse User? @relation("SpouseFamily", fields: [spouseUserId], references: [id])
+  babies Baby[]
+
+  @@map("families")
+}
+
+model Pregnancy {
+  id                String               @id @default(uuid())
+  motherId          String               @map("mother_id")
+  calcMethod        PregnancyCalcMethod  @map("calc_method")
+  lmpDate           DateTime?            @map("lmp_date")
+  conceptionDate    DateTime?            @map("conception_date")
+  ultrasoundDate    DateTime?            @map("ultrasound_date")
+  ultrasoundWeeks   Int?                 @map("ultrasound_weeks")
+  dueDate           DateTime             @map("due_date")
+  status            PregnancyStatus      @default(active)
+  // أُضيفت لأسئلة التسجيل (رحلة الأمومة): هل هذا الحمل الأول، وعدد الأحمال السابقة إن لم يكن
+  isFirstPregnancy         Boolean? @map("is_first_pregnancy")
+  previousPregnanciesCount Int?     @map("previous_pregnancies_count")
+  hasHealthCondition       Boolean  @default(false) @map("has_health_condition")
+  healthConditionNote      String?  @map("health_condition_note")
+  createdAt         DateTime             @default(now()) @map("created_at")
+
+  mother           User                @relation(fields: [motherId], references: [id], onDelete: Cascade)
+  weeklyLogs       PregnancyWeeklyLog[]
+  postpartumPeriod PostpartumPeriod?
+
+  @@index([motherId])
+  @@map("pregnancies")
+}
+
+model PregnancyWeeklyLog {
+  id          String   @id @default(uuid())
+  pregnancyId String   @map("pregnancy_id")
+  weekNumber  Int      @map("week_number")
+  weightKg    Decimal? @map("weight_kg") @db.Decimal(5, 2)
+  symptoms    Json?
+  notes       String?
+  loggedAt    DateTime @default(now()) @map("logged_at")
+
+  pregnancy Pregnancy @relation(fields: [pregnancyId], references: [id], onDelete: Cascade)
+
+  @@index([pregnancyId])
+  @@map("pregnancy_weekly_logs")
+}
+
+model PregnancyWeekContent {
+  id                 String @id @default(uuid())
+  weekNumber         Int    @unique @map("week_number")
+  babySizeComparison String @map("baby_size_comparison")
+  babyWeightGrams    Int?   @map("baby_weight_grams")
+  babyLengthCm       Decimal? @map("baby_length_cm") @db.Decimal(5, 2)
+  bodyChangesText    String @map("body_changes_text")
+  tipsJson           Json   @map("tips_json")
+  developmentJson    Json   @map("development_json")
+
+  @@map("pregnancy_week_content")
+}
+
+model Reminder {
+  id            String       @id @default(uuid())
+  userId        String       @map("user_id")
+  type          ReminderType
+  title         String
+  scheduledTime DateTime     @map("scheduled_time")
+  recurrence    String?
+  isDone        Boolean      @default(false) @map("is_done")
+  createdAt     DateTime     @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("reminders")
+}
+
+model AssessmentDomain {
+  id     String               @id @default(uuid())
+  name   AssessmentDomainName @unique
+  nameAr String               @map("name_ar")
+  // نص تعريفي قصير للبطاقة في صفحة قائمة المقاييس
+  descriptionAr  String? @map("description_ar")
+  // السؤال التمهيدي الظاهر أعلى صفحة إجراء التقييم (مثال: "خلال الأسبوعين الماضيين...")
+  instructionsAr String? @map("instructions_ar")
+  // العلامة الفاصلة بين النظام القديم المُخترَع (5 محاور عامة) والمقاييس المعيارية
+  // الجديدة (GAD-7/EPDS) — تُستثنى المحاور القديمة من قائمة المقاييس المعروضة للمستخدمة
+  // ومن قبول تقييمات جديدة، لكنها تبقى في الجدول لأن نتائجها التاريخية لا تُحذف
+  isLegacy Boolean @default(false) @map("is_legacy")
+
+  questions AssessmentQuestion[]
+  results   AssessmentResult[]
+
+  @@map("assessment_domains")
+}
+
+model AssessmentQuestion {
+  id             String @id @default(uuid())
+  domainId       String @map("domain_id")
+  questionTextAr String @map("question_text_ar")
+  order          Int
+  // نصوص خيارات الإجابة الأربعة بترتيب عرضها فعليًا (index 0-3) — كل بند في EPDS له
+  // صياغة مختلفة رسميًا، بخلاف GAD-7 حيث يتكرر نفس المقياس لكل بند. Json? (لا Json إلزامي)
+  // لأن أسئلة النظام القديم لا تملك هذه البيانات ولن تُختلق لها بأثر رجعي
+  optionsJson    Json?   @map("options_json")
+  // عند true، السجل i المُرسل من العميل (0-3، فهرس الخيار كما يظهر للمستخدمة) يُعكس
+  // إلى (3 - i) قبل الجمع في المجموع الكلي — القيمة تُقرأ من هنا دومًا، لا تُرمَّز في الكود
+  reverseScored  Boolean @default(false) @map("reverse_scored")
+  // البند العاشر في EPDS فقط حاليًا (إيذاء النفس) — أي إجابة بدرجة محسوبة > 0 عليه
+  // تُنشئ urgent_help_request تلقائيًا بغض النظر عن المجموع الكلي
+  isCritical     Boolean @default(false) @map("is_critical")
+
+  domain AssessmentDomain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([domainId])
+  @@map("assessment_questions")
+}
+
+model AssessmentResult {
+  id             String                    @id @default(uuid())
+  userId         String                    @map("user_id")
+  domainId       String                    @map("domain_id")
+  totalScore     Int                       @map("total_score")
+  classification AssessmentClassification
+  answers        Json
+  takenAt        DateTime                  @default(now()) @map("taken_at")
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domain            AssessmentDomain   @relation(fields: [domainId], references: [id])
+  urgentHelpRequest UrgentHelpRequest?
+
+  @@index([userId])
+  @@index([domainId])
+  @@map("assessment_results")
+}
+
+enum UrgentHelpTriggerSource {
+  epds_critical_item
+  manual_button
+}
+
+enum UrgentHelpStatus {
+  open
+  contacted
+  closed
+}
+
+// طابور تدخّل السلامة — يُنشأ تلقائيًا عند إجابة حرجة على بند EPDS العاشر، أو يدويًا
+// عبر زر "أحتاج للتحدث مع أحد الآن" في أي وقت (manual_button)، بلا ربط بتقييم بالضرورة
+model UrgentHelpRequest {
+  id                 String                  @id @default(uuid())
+  userId             String                  @map("user_id")
+  triggerSource      UrgentHelpTriggerSource @map("trigger_source")
+  assessmentResultId String?                 @unique @map("assessment_result_id")
+  status             UrgentHelpStatus        @default(open)
+  createdAt          DateTime                @default(now()) @map("created_at")
+  notes              String?
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assessmentResult AssessmentResult? @relation(fields: [assessmentResultId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@map("urgent_help_requests")
+}
+
+model DailyTip {
+  id        String @id @default(uuid())
+  tipNumber Int    @unique @map("tip_number")
+  tipTextAr String @map("tip_text_ar")
+
+  @@map("daily_tips")
+}
+
+model Notification {
+  id     String           @id @default(uuid())
+  userId String           @map("user_id")
+  type   NotificationType
+  title  String
+  body   String
+  isRead Boolean          @default(false) @map("is_read")
+
+  // يمنع تكرار إشعار تذكير الموعد لنفس التذكير أكثر من مرة (فحص idempotency في الـ scheduled job)
+  sourceReminderId String?  @map("source_reminder_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sourceReminderId])
+  @@map("notifications")
+}
+
+model Specialist {
+  id              String           @id @default(uuid())
+  userId          String           @unique @map("user_id")
+  fullName        String           @map("full_name")
+  specialty       String
+  bio             String
+  yearsExperience Int              @map("years_experience")
+  photoUrl        String?          @map("photo_url")
+  status          SpecialistStatus @default(pending)
+  // مسار المرافقة الثلاثي — النفسية/الصحية/الغذائية. الافتراضي psychological هنا لغرض
+  // ترحيل الأخصائيين الموجودين مسبقًا فقط (كانوا جميعًا نفسيين)؛ الحقل إلزامي فعليًا على
+  // مستوى الـDTO (RegisterSpecialistProfileDto) عند إنشاء ملف مهني جديد، لا اختياري ضمنيًا
+  track           SpecialistTrack @default(psychological)
+  createdAt       DateTime         @default(now()) @map("created_at")
+
+  user         User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  availability SpecialistAvailability[]
+  bookings     Booking[]
+  settlements  SpecialistSettlement[]
+  courses      Course[]
+  patientDataSharing PatientDataSharing[]
+  clinicalNotes      ClinicalNote[]
+
+  @@index([status])
+  @@index([track])
+  @@map("specialists")
+}
+
+enum SpecialistTrack {
+  psychological
+  health
+  nutrition
+}
+
+enum ServiceKind {
+  consultation
+  course
+}
+
+// أسعار ثابتة موحّدة لكل نوع خدمة × نوع استشارة (حضوري/عن بُعد)، بدل أرقام مبعثرة في الكود.
+// bookings تعرض السعر المناسب للعرض فقط (لا حقل سعر على Booking أصلاً)، وcourses تحسب
+// price منها فعليًا عند الإنشاء بدل الوثوق بما يرسله الأخصائي.
+model ServicePricing {
+  id               String           @id @default(uuid())
+  serviceKind      ServiceKind      @map("service_kind")
+  consultationType ConsultationType @map("consultation_type")
+  price            Int
+
+  @@unique([serviceKind, consultationType])
+  @@map("service_pricing")
+}
+
+model SpecialistAvailability {
+  id               String           @id @default(uuid())
+  specialistId     String           @map("specialist_id")
+  startTime        DateTime         @map("start_time")
+  endTime          DateTime         @map("end_time")
+  consultationType ConsultationType @map("consultation_type")
+  // مطلوبة فقط عند in_person (يُتحقَّق منها في منطق التطبيق)
+  wilaya           String?
+  isBooked         Boolean          @default(false) @map("is_booked")
+  createdAt        DateTime         @default(now()) @map("created_at")
+
+  specialist Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  booking    Booking?
+
+  @@unique([specialistId, startTime])
+  @@index([specialistId, isBooked])
+  @@map("specialist_availability")
+}
+
+model ConsultationReason {
+  id         String  @id @default(uuid())
+  reasonText String  @map("reason_text")
+  isActive   Boolean @default(true) @map("is_active")
+
+  bookings Booking[]
+
+  @@map("consultation_reasons")
+}
+
+model Booking {
+  id                   String           @id @default(uuid())
+  userId               String           @map("user_id")
+  specialistId         String           @map("specialist_id")
+  // القيد الوحيد الحقيقي الذي يمنع الحجز المزدوج: علاقة 1-إلى-1 محكومة بـ UNIQUE
+  // على مستوى قاعدة البيانات — محاولتا حجز متزامنتان لنفس الفتحة، الثانية تفشل
+  // حتمًا بخطأ انتهاك القيد (P2002)، بغض النظر عن أي تحقق في كود التطبيق.
+  availabilitySlotId   String           @unique @map("availability_slot_id")
+  consultationType     ConsultationType @map("consultation_type")
+  reasonId             String           @map("reason_id")
+  questionnaireAnswers Json?            @map("questionnaire_answers")
+  status               BookingStatus    @default(pending)
+  videoLink            String?          @map("video_link")
+  paymentMethod        PaymentMethod?   @map("payment_method")
+  paymentStatus        PaymentStatus    @default(pending) @map("payment_status")
+  createdAt            DateTime         @default(now()) @map("created_at")
+
+  user             User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialist       Specialist             @relation(fields: [specialistId], references: [id])
+  availabilitySlot SpecialistAvailability @relation(fields: [availabilitySlotId], references: [id])
+  reason           ConsultationReason     @relation(fields: [reasonId], references: [id])
+  review           BookingReview?
+  settlement       SpecialistSettlement?
+  clinicalNotes    ClinicalNote[]
+
+  @@index([userId])
+  @@index([specialistId])
+  @@map("bookings")
+}
+
+model BookingReview {
+  id        String   @id @default(uuid())
+  bookingId String   @unique @map("booking_id")
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("booking_reviews")
+}
+
+model SubscriptionPlan {
+  id                 String             @id @default(uuid())
+  code               String             @unique
+  nameAr             String             @map("name_ar")
+  price              Int
+  currency           String             @default("DZD")
+  type               SubscriptionType
+  bookingCredits     Int                @map("booking_credits")
+  courseCredits      Int                @map("course_credits")
+  unlimitedBookings  Boolean            @default(false) @map("unlimited_bookings")
+  featuresJson       Json               @map("features_json")
+  createdAt          DateTime           @default(now()) @map("created_at")
+
+  subscriptions      UserSubscription[]
+
+  @@map("subscription_plans")
+}
+
+model UserSubscription {
+  id                        String              @id @default(uuid())
+  userId                    String              @map("user_id")
+  planId                    String              @map("plan_id")
+  status                    SubscriptionStatus
+  startedAt                 DateTime            @default(now()) @map("started_at")
+  expiresAt                 DateTime?           @map("expires_at")
+  bookingCreditsRemaining   Int                 @map("booking_credits_remaining")
+  courseCreditsRemaining    Int                 @map("course_credits_remaining")
+  paymentIntentId           String?             @map("payment_intent_id")
+  createdAt                 DateTime            @default(now()) @map("created_at")
+
+  user         User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan         SubscriptionPlan           @relation(fields: [planId], references: [id])
+  transactions SubscriptionTransaction[]
+
+  @@map("user_subscriptions")
+}
+
+model SubscriptionTransaction {
+  id                  String                    @id @default(uuid())
+  userSubscriptionId  String                    @map("user_subscription_id")
+  amount              Int
+  paymentMethod       SubscriptionPaymentMethod @map("payment_method")
+  paymentProviderRef  String                    @map("payment_provider_ref")
+  status              TransactionStatus
+  createdAt           DateTime                  @default(now()) @map("created_at")
+
+  subscription UserSubscription @relation(fields: [userSubscriptionId], references: [id])
+
+  @@map("subscription_transactions")
+}
+
+model SpecialistSettlement {
+  id                String           @id @default(uuid())
+  specialistId      String           @map("specialist_id")
+  // @unique ضرورية هنا: Booking.settlement أدناه مُعرَّفة كعلاقة مفردة اختيارية (One-to-One)،
+  // وPrisma يتطلب @unique على مفتاح العلاقة العكسية ليصح هذا (نفس نمط bookingId في BookingReview
+  // وavailabilitySlotId في Booking نفسه) — بدونها الـschema لا يمر بالتحقق أصلًا.
+  bookingId         String           @unique @map("booking_id")
+  grossAmount       Int              @map("gross_amount")
+  platformFeeAmount Int              @map("platform_fee_amount")
+  netAmount         Int              @map("net_amount")
+  status            SettlementStatus @default(pending)
+  periodStart       DateTime         @map("period_start")
+  periodEnd         DateTime         @map("period_end")
+  createdAt         DateTime         @default(now()) @map("created_at")
+
+  specialist Specialist @relation(fields: [specialistId], references: [id])
+  booking    Booking    @relation(fields: [bookingId], references: [id])
+
+  @@map("specialist_settlements")
+}
+
+enum BabyGender {
+  male
+  female
+}
+
+model PostpartumPeriod {
+  id          String   @id @default(uuid())
+  motherId    String   @map("mother_id")
+  // 1-إلى-1 مع Pregnancy: كل حمل يكتمل ينشئ فترة نفاس واحدة بالضبط
+  pregnancyId String   @unique @map("pregnancy_id")
+  birthDate   DateTime @map("birth_date")
+  // أُضيفت لأسئلة التسجيل (مسار "أنا في فترة النفاس")
+  deliveryType         DeliveryType? @map("delivery_type")
+  hasComplications     Boolean       @default(false) @map("has_complications")
+  isBreastfeeding      Boolean       @default(false) @map("is_breastfeeding")
+  hasHealthCondition   Boolean       @default(false) @map("has_health_condition")
+  healthConditionNote  String?       @map("health_condition_note")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  mother    User                @relation(fields: [motherId], references: [id], onDelete: Cascade)
+  pregnancy Pregnancy           @relation(fields: [pregnancyId], references: [id], onDelete: Cascade)
+  moodLogs  PostpartumMoodLog[]
+
+  @@index([motherId])
+  @@map("postpartum_periods")
+}
+
+// محتفَظ به للتوافق مع البيانات التاريخية فقط — لم يعد يُكتَب إليه. PostpartumService
+// يقرأ ويكتب الآن من/إلى MoodLog العام أدناه (مفلترًا بتاريخ بداية فترة النفاس)، لأن
+// متابعة المزاج أصبحت متاحة عبر رحلة الألف يوم كاملة لا فترة النفاس فقط
+model PostpartumMoodLog {
+  id                 String   @id @default(uuid())
+  postpartumPeriodId String   @map("postpartum_period_id")
+  moodLevel          Int      @map("mood_level")
+  notes              String?
+  loggedAt           DateTime @default(now()) @map("logged_at")
+
+  postpartumPeriod PostpartumPeriod @relation(fields: [postpartumPeriodId], references: [id], onDelete: Cascade)
+
+  @@index([postpartumPeriodId, loggedAt])
+  @@map("postpartum_mood_logs")
+}
+
+// تتبّع المزاج العام المتاح عبر رحلة الألف يوم كاملة (حمل + نفاس وما بعده)، بلا اشتراط
+// وجود فترة نفاس. تسجيل واحد فقط لكل يوم تقويمي لكل مستخدمة (logDate بتوقيت UTC منتصف
+// الليل، بنفس منطق حدود اليوم المستخدم في weekStartDate بوحدة nutrition) — التسجيل
+// الثاني في نفس اليوم يُحدَّث عبر upsert بدل إنشاء صف مكرر
+model MoodLog {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  moodLevel Int      @map("mood_level")
+  notes     String?
+  logDate   DateTime @map("log_date") @db.Date
+  loggedAt  DateTime @default(now()) @map("logged_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, logDate])
+  @@index([userId, loggedAt])
+  @@map("mood_logs")
+}
+
+// آراء الأمهات — تُنشأ بـisApproved=false دومًا، ولا تظهر لأي مستخدم عام حتى يعتمدها
+// admin صراحةً عبر PATCH /admin/testimonials/:id/approve
+model Testimonial {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  content     String
+  rating      Int
+  // User لا يملك حقل اسم أصلًا (فقط phone/email) — الاسم المعروض اختياري وتكتبه
+  // الأم بنفسها عند الإرسال (مثلاً "سلمى")، ويُعرض "أم" كافتراضي إن تُرك فارغًا
+  displayName String?  @map("display_name")
+  isApproved  Boolean  @default(false) @map("is_approved")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([isApproved])
+  @@map("testimonials")
+}
+
+model Baby {
+  id          String     @id @default(uuid())
+  familyId    String     @map("family_id")
+  fullName    String     @map("full_name")
+  birthDate   DateTime   @map("birth_date")
+  gender      BabyGender
+  weightGrams Int?       @map("weight_grams")
+  heightCm    Decimal?   @map("height_cm") @db.Decimal(5, 2)
+  createdAt   DateTime   @default(now()) @map("created_at")
+
+  family   Family        @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  checkups BabyCheckup[]
+
+  @@index([familyId])
+  @@map("babies")
+}
+
+model BabyCheckup {
+  id            String   @id @default(uuid())
+  babyId        String   @map("baby_id")
+  title         String
+  scheduledDate DateTime @map("scheduled_date")
+  notes         String?
+  completed     Boolean  @default(false)
+  // مرجع فضفاض بلا علاقة Prisma رسمية — نفس نمط Notification.sourceReminderId الموجود مسبقًا
+  linkedReminderId String? @map("linked_reminder_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  baby Baby @relation(fields: [babyId], references: [id], onDelete: Cascade)
+
+  @@index([babyId])
+  @@map("baby_checkups")
+}
+
+model Course {
+  id           String           @id @default(uuid())
+  specialistId String           @map("specialist_id")
+  title        String
+  description  String
+  // نُعيد استخدام ConsultationType الموجود (in_person/remote) بدل enum جديد مطابق بالقيم تمامًا
+  type         ConsultationType
+  // للحضوري فقط: الحد الأقصى للمقاعد. null = بلا حد (يُفرض هذا في منطق الخدمة لا الـschema)
+  capacity     Int?
+  // عدّاد ذري يُحدَّث عند كل تسجيل ناجح — أساس فحص السعة تحت التزامن الحقيقي (نفس فلسفة
+  // bookings من حيث الاعتماد على قيد ذري داخل transaction، لكن هنا عبر updateMany بشرط
+  // enrolledCount < capacity بدل UNIQUE على مورد وحيد، لأن سعة الدورة > 1 عادةً وليست 1-إلى-1
+  // كما في فترات توفر الأخصائيين)
+  enrolledCount Int             @default(0) @map("enrolled_count")
+  startDate    DateTime         @map("start_date")
+  // نصية حرة للعرض فقط (كما طُلب حرفيًا: "مدة نصية")
+  durationText String           @map("duration_text")
+  // مدة رقمية بالأيام لاحتساب موعد اكتمال الدورة فعليًا لبوابة إصدار الشهادة — durationText
+  // النصي الحر لا يمكن حسابه برمجيًا، فأُضيف هذا الحقل خصيصًا لتحقيق شرط "بعد اكتمال الدورة"
+  // المطلوب صراحةً في مسار الشهادة
+  durationDays Int              @map("duration_days")
+  price        Int
+  // للعن بُعد فقط: رابط خارجي للمحتوى
+  contentUrl   String?          @map("content_url")
+  // للحضوري فقط
+  wilaya       String?
+  createdAt    DateTime         @default(now()) @map("created_at")
+
+  specialist  Specialist         @relation(fields: [specialistId], references: [id])
+  enrollments CourseEnrollment[]
+
+  @@index([specialistId])
+  @@map("courses")
+}
+
+model CourseEnrollment {
+  id                  String    @id @default(uuid())
+  courseId            String    @map("course_id")
+  userId              String    @map("user_id")
+  isFree              Boolean   @default(false) @map("is_free")
+  certificateIssued   Boolean   @default(false) @map("certificate_issued")
+  certificateIssuedAt DateTime? @map("certificate_issued_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // يمنع تسجيل نفس المستخدم مرتين في نفس الدورة على مستوى قاعدة البيانات
+  @@unique([courseId, userId])
+  @@index([courseId])
+  @@index([userId])
+  @@map("course_enrollments")
+}
+
+enum MealType {
+  lunch
+  dinner
+}
+
+enum MealOrderStatus {
+  pending
+  confirmed
+  out_for_delivery
+  delivered
+  cancelled
+}
+
+enum ServiceBookingStatus {
+  pending
+  confirmed
+  completed
+  cancelled
+}
+
+model WeeklyMeal {
+  id          String   @id @default(uuid())
+  // 0-6 بنفس ترميز JavaScript Date.getDay() (0 = الأحد) — يطابق حساب "بداية الأسبوع" برمجيًا أدناه
+  dayOfWeek   Int      @map("day_of_week")
+  mealType    MealType @map("meal_type")
+  name        String
+  description String
+  price       Int
+  imageUrl    String?  @map("image_url")
+  // بداية الأسبوع (الأحد 00:00 UTC) الذي تنتمي إليه هذه الوجبة
+  weekStartDate DateTime @map("week_start_date")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  orderItems MealOrderItem[]
+
+  @@index([weekStartDate])
+  @@map("weekly_meals")
+}
+
+model MealOrder {
+  id              String          @id @default(uuid())
+  userId          String          @map("user_id")
+  // يُحسب من عناصر الطلب في الـbackend دومًا — أي سعر يرسله العميل يُتجاهل تمامًا
+  totalPrice      Int             @map("total_price")
+  deliveryAddress String          @map("delivery_address")
+  preferredTime   DateTime        @map("preferred_time")
+  status          MealOrderStatus @default(pending)
+  createdAt       DateTime        @default(now()) @map("created_at")
+
+  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items MealOrderItem[]
+
+  @@index([userId])
+  @@map("meal_orders")
+}
+
+model MealOrderItem {
+  id        String @id @default(uuid())
+  orderId   String @map("order_id")
+  mealId    String @map("meal_id")
+  quantity  Int
+  // لقطة من سعر الوجبة وقت الطلب — لا يتأثر بتغيّر سعر الوجبة لاحقًا (سلامة مالية/تدقيق)
+  unitPrice Int    @map("unit_price")
+
+  order MealOrder  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  meal  WeeklyMeal @relation(fields: [mealId], references: [id])
+
+  @@index([orderId])
+  @@map("meal_order_items")
+}
+
+model HomeService {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  basePrice   Int      @map("base_price")
+  category    String
+  imageUrl    String?  @map("image_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  bookings ServiceBooking[]
+
+  @@index([category])
+  @@map("home_services")
+}
+
+model ServiceBooking {
+  id            String               @id @default(uuid())
+  userId        String               @map("user_id")
+  serviceId     String               @map("service_id")
+  scheduledTime DateTime             @map("scheduled_time")
+  address       String
+  notes         String?
+  status        ServiceBookingStatus @default(pending)
+  createdAt     DateTime             @default(now()) @map("created_at")
+
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  service HomeService @relation(fields: [serviceId], references: [id])
+
+  @@index([userId])
+  @@map("service_bookings")
+}
+
+enum ProductOrderStatus {
+  pending
+  confirmed
+  shipped
+  delivered
+  cancelled
+}
+
+model Product {
+  id            String   @id @default(uuid())
+  name          String
+  description   String
+  price         Int
+  category      String
+  imageUrl      String?  @map("image_url")
+  stockQuantity Int      @map("stock_quantity")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  orderItems ProductOrderItem[]
+
+  @@index([category])
+  @@map("products")
+}
+
+model ProductOrder {
+  id              String             @id @default(uuid())
+  userId          String             @map("user_id")
+  // يُحسب من عناصر الطلب في الـbackend دومًا — نفس نمط meal_orders.total_price بالحرف
+  totalPrice      Int                @map("total_price")
+  deliveryAddress String             @map("delivery_address")
+  status          ProductOrderStatus @default(pending)
+  createdAt       DateTime           @default(now()) @map("created_at")
+
+  user  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items ProductOrderItem[]
+
+  @@index([userId])
+  @@map("product_orders")
+}
+
+model ProductOrderItem {
+  id        String @id @default(uuid())
+  orderId   String @map("order_id")
+  productId String @map("product_id")
+  quantity  Int
+  // لقطة من سعر المنتج وقت الطلب — نفس نمط meal_order_items.unit_price بالحرف
+  unitPrice Int    @map("unit_price")
+
+  order   ProductOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product      @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@map("product_order_items")
+}
+
+// الدولا الرقمية: أسئلة وأجوبة مكتوبة مسبقًا فقط — لا استدعاء لأي نموذج لغوي أو API خارجي
+model FaqCategory {
+  id           String   @id @default(uuid())
+  nameAr       String   @map("name_ar")
+  iconName     String   @map("icon_name")
+  displayOrder Int      @default(0) @map("display_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  entries FaqEntry[]
+
+  @@map("faq_categories")
+}
+
+model FaqEntry {
+  id           String   @id @default(uuid())
+  categoryId   String   @map("category_id")
+  questionAr   String   @map("question_ar")
+  answerAr     String   @map("answer_ar")
+  displayOrder Int      @default(0) @map("display_order")
+  isActive     Boolean  @default(true) @map("is_active")
+  // مصفوفة معرّفات أسئلة متابعة مقترحة (2-3 عادة) — لا قيد FK لأنها Json، تُتحقق منها في التطبيق
+  relatedEntryIds Json? @map("related_entry_ids")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  category FaqCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([categoryId])
+  @@map("faq_entries")
+}
+
+// بيانات ملفّ إداري إضافية — User لا يملك حقل اسم أصلًا (نفس سبب Testimonial.displayName
+// أعلاه)، فاستُحدِث هذا الجدول على نمط Specialist.fullName الموجود مسبقًا في المشروع
+model AdminProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  fullName  String   @map("full_name")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("admin_profiles")
+}
+
+// سجل نشاط إداري — يُسجَّل تلقائيًا عبر AuditLogInterceptor العام، لا يدويًا من كل service
+model AdminAuditLog {
+  id          String   @id @default(uuid())
+  adminUserId String   @map("admin_user_id")
+  action      String
+  entityType  String   @map("entity_type")
+  entityId    String?  @map("entity_id")
+  details     Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  adminUser User @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId])
+  @@index([entityType])
+  @@index([action])
+  @@index([createdAt])
+  @@map("admin_audit_logs")
+}
+
+enum ArticleCategory {
+  pregnancy
+  birth
+  postpartum
+  baby_health
+  nutrition
+  mental_health
+}
+
+// مقالات المدوّنة — authorName نص حر (مثل Testimonial.displayName) لأنه اسم كاتبة/مصدر
+// محتوى، لا حساب User فعلي، فلا داعي لعلاقة
+model Article {
+  id               String          @id @default(uuid())
+  titleAr          String          @map("title_ar")
+  slug             String          @unique
+  excerptAr        String          @map("excerpt_ar")
+  contentAr        String          @map("content_ar")
+  coverImageUrl    String          @map("cover_image_url")
+  category         ArticleCategory
+  authorName       String          @map("author_name")
+  isPublished      Boolean         @default(false) @map("is_published")
+  publishedAt      DateTime?       @map("published_at")
+  readTimeMinutes  Int?            @map("read_time_minutes")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@index([isPublished, publishedAt])
+  @@map("articles")
+}
+
+// إعدادات مشاركة بيانات الأم مع أخصائية معينة — كل الحقول false افتراضيًا (خصوصية أولًا،
+// لا مشاركة تلقائية). صف واحد لكل زوج (أم، أخصائية)؛ ينشأ بأول PATCH من الأم على
+// GET /api/v1/data-sharing/:specialistId إن لم يكن موجودًا (upsert في الخدمة)
+model PatientDataSharing {
+  id                  String   @id @default(uuid())
+  userId              String   @map("user_id")
+  specialistId        String   @map("specialist_id")
+  shareMoodLogs       Boolean  @default(false) @map("share_mood_logs")
+  shareAssessments    Boolean  @default(false) @map("share_assessments")
+  sharePregnancyData  Boolean  @default(false) @map("share_pregnancy_data")
+  sharePostpartumData Boolean  @default(false) @map("share_postpartum_data")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialist Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, specialistId])
+  @@map("patient_data_sharing")
+}
+
+// ملاحظات كلينيكية تكتبها الأخصائية عن جلسة مع مريضة — لا تظهر للأم في أي مسار إطلاقًا.
+// specialistId يجب أن يطابق booking.specialistId دومًا (يُتحقق منه في ClinicalNotesService
+// عند الإنشاء، لا يُترك للـclient تحديده اعتباطًا رغم وجوده كحقل مباشر هنا)
+model ClinicalNote {
+  id            String   @id @default(uuid())
+  bookingId     String   @map("booking_id")
+  specialistId  String   @map("specialist_id")
+  patientUserId String   @map("patient_user_id")
+  noteText      String   @map("note_text")
+  sessionDate   DateTime @map("session_date") @db.Date
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  booking    Booking    @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  specialist Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  patient    User       @relation(fields: [patientUserId], references: [id], onDelete: Cascade)
+
+  @@index([specialistId, patientUserId])
+  @@index([bookingId])
+  @@map("clinical_notes")
+}
+
+// سجل محاولات دخول فاشلة — بلا FK لـUser عمداً (خلافًا لـadmin_audit_logs) لأن الهدف
+// الأساسي رصد محاولات على أرقام هواتف غير موجودة أصلًا (تخمين/brute force)، لا فقط كلمة
+// مرور خاطئة على حساب حقيقي. phoneHash = sha256(phone) لا الرقم نفسه ولا كلمة المرور مطلقًا.
+// append-only بالتصميم: لا PATCH ولا DELETE endpoint له (لا حتى GET حاليًا — خارج النطاق المطلوب)
+model LoginAttemptLog {
+  id        String   @id @default(uuid())
+  phoneHash String   @map("phone_hash")
+  ip        String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([phoneHash])
+  @@index([createdAt])
+  @@map("login_attempt_logs")
+}

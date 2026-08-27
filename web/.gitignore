@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js
+.next/
+out/
+build/
+
+# Environment (مهم جداً — لا يُرفع أبداً)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.production
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# ملاحظة: صور public/specialists/ وفيديو public/videos/intro.mp4 لم تُستثنَ هنا عمدًا —
+# هذه ليست صورًا خاصة بل أصول عامة يعرضها التطبيق فعليًا (صور الأخصائيات الحقيقية على
+# صفحاتهن، وفيديو المقدمة القابل للتشغيل)؛ استثناؤها يكسر الموقع بعد أي clone جديد.
