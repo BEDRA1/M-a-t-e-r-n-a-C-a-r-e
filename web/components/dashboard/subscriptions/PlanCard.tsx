@@ -28,7 +28,7 @@ export function PlanCard({
       className={
         highlight
           ? "relative flex flex-col overflow-hidden rounded-[var(--radius-card)] border-2 border-primary-500 bg-surface p-6 shadow-[var(--shadow-soft)]"
-          : "relative flex flex-col rounded-[var(--radius-card)] border border-black/5 bg-surface p-6 shadow-[var(--shadow-soft)]"
+          : "relative flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-black/5 bg-surface p-6 shadow-[var(--shadow-soft)]"
       }
     >
       {highlight && (
@@ -39,8 +39,8 @@ export function PlanCard({
       )}
 
       <p className="text-lg font-extrabold text-foreground">{plan.nameAr}</p>
-      <div className="mt-2 flex items-baseline gap-1.5">
-        <span className="text-2xl font-extrabold text-foreground">{formatDzd(plan.price)}</span>
+      <div className="mt-2 flex flex-wrap items-baseline gap-1.5">
+        <span className="whitespace-nowrap text-2xl font-extrabold text-foreground">{formatDzd(plan.price)}</span>
         <span className="text-sm text-muted">{periodLabel}</span>
       </div>
 
@@ -69,9 +69,9 @@ export function PlanCard({
 
       <ul className="mt-4 flex flex-1 flex-col gap-2">
         {plan.featuresJson.map((feature) => (
-          <li key={feature} className="flex items-start gap-2 text-sm text-foreground/80">
-            <Check className="mt-0.5 size-4 shrink-0 text-primary-500" strokeWidth={2.5} />
-            {feature}
+          <li key={feature} className="flex items-start justify-end gap-2 text-sm text-foreground/80">
+            <span className="min-w-0 flex-1 break-words text-right leading-relaxed">{feature}</span>
+            <Check className="mt-0.5 size-4 flex-shrink-0 text-primary-500" strokeWidth={2.5} />
           </li>
         ))}
       </ul>

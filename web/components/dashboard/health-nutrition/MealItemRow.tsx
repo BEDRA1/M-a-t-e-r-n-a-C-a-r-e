@@ -32,7 +32,7 @@ export function MealItemRow({
           type="button"
           onClick={onDecrement}
           disabled={quantity === 0}
-          className="flex size-10 items-center justify-center rounded-full border border-black/10 text-foreground transition-colors hover:bg-primary-50 disabled:opacity-40"
+          className="flex size-11 items-center justify-center rounded-full border border-black/10 text-foreground transition-colors hover:bg-primary-50 disabled:opacity-40"
           aria-label="إنقاص الكمية"
         >
           <Minus className="size-3.5" strokeWidth={2.5} />
@@ -41,7 +41,7 @@ export function MealItemRow({
         <button
           type="button"
           onClick={onIncrement}
-          className="flex size-10 items-center justify-center rounded-full bg-primary-500 text-white transition-colors hover:bg-primary-600"
+          className="flex size-11 items-center justify-center rounded-full bg-primary-500 text-white transition-colors hover:bg-primary-600"
           aria-label="زيادة الكمية"
         >
           <Plus className="size-3.5" strokeWidth={2.5} />

@@ -98,20 +98,9 @@ export function CoursesListContent() {
           <p>لا توجد دورات مطابقة لهذا الفلتر حاليًا.</p>
         </Card>
       ) : (
-        <div
-          className={cn(
-            "flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1",
-            "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-            "sm:grid sm:grid-cols-2 sm:overflow-visible sm:snap-none sm:pb-0 lg:grid-cols-3",
-          )}
-        >
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {courses.data.map((course) => (
-            <div
-              key={course.id}
-              className="min-w-[78%] shrink-0 snap-start sm:min-w-0 sm:shrink sm:snap-align-none"
-            >
-              <CourseCard course={course} />
-            </div>
+            <CourseCard key={course.id} course={course} />
           ))}
         </div>
       )}

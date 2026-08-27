@@ -99,7 +99,7 @@ export function TakeAssessmentContent({ domainId }: { domainId: string }) {
                         : "border-black/10 bg-surface text-foreground/80 hover:border-primary-200",
                     )}
                   >
-                    <span>{optionText}</span>
+                    <span className="min-w-0 flex-1 break-words">{optionText}</span>
                     <span
                       className={cn(
                         "flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",

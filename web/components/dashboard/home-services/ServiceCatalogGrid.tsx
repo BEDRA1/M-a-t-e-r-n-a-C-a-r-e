@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Alert } from "@/components/ui/Alert";
 import { PackageSearch } from "lucide-react";
-import { cn } from "@/lib/cn";
 import { useHomeServicesCatalog } from "@/lib/hooks/useHomeServices";
 import { ApiError } from "@/lib/api-client";
 import { ServiceCard } from "./ServiceCard";
@@ -53,17 +52,9 @@ export function ServiceCatalogGrid() {
   }
 
   return (
-    <div
-      className={cn(
-        "flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1",
-        "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-        "sm:grid sm:grid-cols-2 sm:overflow-visible sm:snap-none sm:pb-0 xl:grid-cols-3",
-      )}
-    >
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {visibleServices.map((service) => (
-        <div key={service.id} className="min-w-[78%] shrink-0 snap-start sm:min-w-0 sm:shrink sm:snap-align-none">
-          <ServiceCard service={service} />
-        </div>
+        <ServiceCard key={service.id} service={service} />
       ))}
     </div>
   );

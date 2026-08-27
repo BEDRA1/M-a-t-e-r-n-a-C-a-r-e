@@ -107,19 +107,23 @@ function WeeklyMealsSection() {
         )}
       </div>
 
-      {/* الهاتف والتابلت: زر عائم يفتح السلة كـBottomSheet بدل تكديسها أسفل الشبكة */}
+      {/* الهاتف والتابلت: زر عائم يفتح السلة كـBottomSheet بدل تكديسها أسفل الشبكة —
+          spacer بنفس ارتفاع الزر يمنع تغطيته لآخر بطاقة عند التمرير للأسفل */}
       {cartItemCount > 0 && (
-        <button
-          type="button"
-          onClick={() => setCartSheetOpen(true)}
-          className="fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-30 flex items-center justify-between gap-3 rounded-2xl bg-primary-500 px-5 py-4 text-white shadow-lg shadow-primary-500/30 md:bottom-6 lg:hidden"
-        >
-          <span className="flex items-center gap-2 font-bold">
-            <ShoppingBasket className="size-5" strokeWidth={2} />
-            عرض السلة ({cartItemCount})
-          </span>
-          <span className="font-extrabold">{formatDzd(cartTotal)}</span>
-        </button>
+        <>
+          <div className="h-20 lg:hidden" aria-hidden="true" />
+          <button
+            type="button"
+            onClick={() => setCartSheetOpen(true)}
+            className="fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-30 flex items-center justify-between gap-3 rounded-2xl bg-primary-500 px-5 py-4 text-white shadow-lg shadow-primary-500/30 md:bottom-6 lg:hidden"
+          >
+            <span className="flex items-center gap-2 font-bold">
+              <ShoppingBasket className="size-5" strokeWidth={2} />
+              عرض السلة ({cartItemCount})
+            </span>
+            <span className="font-extrabold">{formatDzd(cartTotal)}</span>
+          </button>
+        </>
       )}
 
       <BottomSheet open={cartSheetOpen} onClose={() => setCartSheetOpen(false)}>
