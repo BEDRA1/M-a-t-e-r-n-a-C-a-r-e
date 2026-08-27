@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Calendar, MapPin, Users, Video } from "lucide-react";
+import { Calendar, CheckCircle, MapPin, Users, Video } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -14,13 +14,21 @@ import {
   seatsStatusBadgeTone,
   seatsStatusLabel,
 } from "@/lib/format";
-import { useEnrollCourse } from "@/lib/hooks/useCourses";
+import { useEnrollCourse, useMyCourseEnrollments } from "@/lib/hooks/useCourses";
 import { ApiError } from "@/lib/api-client";
 import { courseCoverImage, TRACKS } from "@/lib/tracks";
 import type { Course } from "@/lib/types";
 
 export function CourseCard({ course }: { course: Course }) {
   const enroll = useEnrollCourse();
+  // السبب الجذري الحقيقي لشكوى "مسجّلة بالفعل ولم أسجل": الضغط الأول كان ينجح فعليًا (201)
+  // لكن الزر لا يتغيّر إطلاقًا بعده — فيبدو للمستخدمة أن شيئًا لم يحدث، وضغطة ثانية طبيعية
+  // تصطدم بـ409 الصحيح فعليًا لكنه يبدو خطأً كاذبًا بلا سياق. هذا التحقق من enrollments/mine
+  // يغطي الحالتين معًا: تسجيل ناجح للتو في هذه الجلسة، أو تسجيل سابق من زيارة سابقة للقائمة
+  const myEnrollments = useMyCourseEnrollments();
+  const alreadyEnrolled =
+    (enroll.isSuccess && enroll.variables === course.id) ||
+    Boolean(myEnrollments.data?.some((e) => e.courseId === course.id));
   const seatsStatus =
     course.type === "in_person" && course.capacity !== null
       ? getSeatsStatus(course.capacity, course.enrolledCount)
@@ -90,17 +98,24 @@ export function CourseCard({ course }: { course: Course }) {
 
         <div className="mt-4 flex items-center justify-between gap-3">
           <span className="font-bold text-foreground">{formatDzd(course.price)}</span>
-          <Button
-            size="sm"
-            disabled={isFull}
-            loading={enroll.isPending && enroll.variables === course.id}
-            onClick={() => enroll.mutate(course.id)}
-          >
-            {isFull ? "اكتملت السعة" : "سجّلي الآن"}
-          </Button>
+          {alreadyEnrolled ? (
+            <span className="flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-sm font-bold text-emerald-700">
+              <CheckCircle className="size-4" strokeWidth={2} />
+              مسجّلة
+            </span>
+          ) : (
+            <Button
+              size="sm"
+              disabled={isFull}
+              loading={enroll.isPending && enroll.variables === course.id}
+              onClick={() => enroll.mutate(course.id)}
+            >
+              {isFull ? "اكتملت السعة" : "سجّلي الآن"}
+            </Button>
+          )}
         </div>
 
-        {enroll.isError && enroll.variables === course.id && (
+        {enroll.isError && enroll.variables === course.id && !alreadyEnrolled && (
           <p className="mt-2 text-xs text-red-600">
             {enroll.error instanceof ApiError ? enroll.error.message : "تعذّر التسجيل في الدورة"}
           </p>
