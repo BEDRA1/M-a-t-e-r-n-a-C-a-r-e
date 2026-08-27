@@ -18,7 +18,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
-  @Throttle({ default: { limit: 10, ttl: 3_600_000 } })
+  @Throttle({ default: { limit: 10, ttl: 3_600_000 } }) // 10 محاولات/ساعة
   @Post('register')
   @ApiOperation({ summary: 'تسجيل مستخدم جديد (أم أو زوج)' })
   register(@Body() dto: RegisterDto) {
@@ -26,7 +26,7 @@ export class AuthController {
   }
 
   @Public()
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle({ default: { limit: 10, ttl: 60_000 } }) // 10 محاولات/دقيقة
   @Post('login')
   @ApiOperation({ summary: 'تسجيل الدخول' })
   login(@Body() dto: LoginDto, @Req() request: Request) {
