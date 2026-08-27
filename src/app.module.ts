@@ -42,9 +42,9 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
-    // الحد الافتراضي لباقي الـAPI (100 طلب/دقيقة/IP) — مسارات حساسة محددة (تسجيل الدخول،
+    // الحد الافتراضي لباقي الـAPI (300 طلب/دقيقة/IP) — مسارات حساسة محددة (تسجيل الدخول،
     // التسجيل، الاشتراك) تُعيد ضبط حدّها الخاص عبر @Throttle() في متحكماتها مباشرة
-    ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 100 }]),
+    ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 300 }]),
     PrismaModule,
     AuthModule,
     FamiliesModule,
