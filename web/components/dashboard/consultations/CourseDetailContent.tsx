@@ -8,6 +8,12 @@ import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { PageSpinner } from "@/components/ui/Spinner";
 import { PaymentMethodSelector } from "@/components/shared/PaymentMethodSelector";
+import {
+  DateTimePicker,
+  dateTimeValueToIso,
+  formatTimeLabel,
+  type DateTimePickerValue,
+} from "@/components/shared/DateTimePicker";
 import { cn } from "@/lib/cn";
 import {
   consultationTypeLabel,
@@ -24,6 +30,13 @@ import { useSimulatedPayment, type BaridimobPaymentData, type CardPaymentData, t
 import { ApiError } from "@/lib/api-client";
 import { courseCoverImage, TRACKS } from "@/lib/tracks";
 
+/** الـBackend الحالي لا يملك حقل لوقت مفضّل لدورة (لها startDate ثابت أصلًا يحدّده الأخصائي) —
+ * تحقّقتُ من courses.controller.ts: enroll() لا يقبل أي @Body() إطلاقًا. لذا يُحفَظ الوقت
+ * المفضّل محليًا فقط (localStorage) كتذكير شخصي للمستخدمة، ولا يُرسَل للخادم */
+function preferredTimeStorageKey(courseId: string): string {
+  return `mc_course_preferred_time_${courseId}`;
+}
+
 export function CourseDetailContent({ courseId }: { courseId: string }) {
   const course = useCourse(courseId);
   const currentUser = useCurrentUser();
@@ -31,6 +44,8 @@ export function CourseDetailContent({ courseId }: { courseId: string }) {
   const enroll = useEnrollCourse();
   const simulatedPayment = useSimulatedPayment();
   const [showPayment, setShowPayment] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [preferredTime, setPreferredTime] = useState<DateTimePickerValue | null>(null);
 
   if (course.isLoading) {
     return <PageSpinner />;
@@ -59,6 +74,26 @@ export function CourseDetailContent({ courseId }: { courseId: string }) {
   const handlePaymentSubmit = async (kind: PaymentMethodKind, paymentData: CardPaymentData | BaridimobPaymentData) => {
     const approved = await simulatedPayment.submit(kind, paymentData);
     if (approved) enroll.mutate(data.id);
+  };
+
+  const startEnrollFlow = () => setShowTimePicker(true);
+
+  const confirmPreferredTime = (value: DateTimePickerValue) => {
+    setPreferredTime(value);
+    try {
+      window.localStorage.setItem(
+        preferredTimeStorageKey(data.id),
+        JSON.stringify({ ...value, iso: dateTimeValueToIso(value) }),
+      );
+    } catch {
+      // localStorage قد يكون غير متاح (وضع تصفح خاص) — التذكير المحلي غير حرج، يُتجاهَل بصمت
+    }
+    setShowTimePicker(false);
+    if (hasCourseCredit) {
+      enroll.mutate(data.id);
+    } else {
+      setShowPayment(true);
+    }
   };
 
   return (
@@ -131,6 +166,11 @@ export function CourseDetailContent({ courseId }: { courseId: string }) {
               <div className="flex flex-col items-center gap-3 rounded-2xl bg-emerald-50 p-5 text-center">
                 <CheckCircle className="size-8 text-emerald-600" strokeWidth={2} />
                 <p className="font-bold text-foreground">تم تسجيلك في الدورة بنجاح</p>
+                {preferredTime && (
+                  <p className="text-sm text-emerald-700">
+                    وقتك المفضّل المحفوظ: {formatArabicDate(preferredTime.date)} — {formatTimeLabel(preferredTime.time)}
+                  </p>
+                )}
                 {data.type === "remote" && data.contentUrl && (
                   <a
                     href={data.contentUrl}
@@ -162,6 +202,28 @@ export function CourseDetailContent({ courseId }: { courseId: string }) {
                       اكتملت مقاعد هذه الدورة، يرجى تصفّح دورات أخرى متاحة.
                     </p>
                   </>
+                ) : showTimePicker ? (
+                  <div className="flex flex-col gap-3">
+                    <p className="text-sm font-semibold text-foreground">
+                      اختاري الوقت المفضّل لحضورك (تذكير شخصي فقط — موعد الدورة الفعلي ثابت كما هو معروض أعلاه)
+                    </p>
+                    <DateTimePicker
+                      value={preferredTime}
+                      onChange={(value) => setPreferredTime(value)}
+                    />
+                    <div className="flex items-center gap-3">
+                      <Button
+                        className="flex-1 sm:flex-none"
+                        disabled={!preferredTime}
+                        onClick={() => preferredTime && confirmPreferredTime(preferredTime)}
+                      >
+                        متابعة التسجيل
+                      </Button>
+                      <Button type="button" variant="ghost" onClick={() => setShowTimePicker(false)} className="flex-1 sm:flex-none">
+                        رجوع
+                      </Button>
+                    </div>
+                  </div>
                 ) : hasCourseCredit ? (
                   <>
                     <div className="mb-3 flex items-start gap-2.5 rounded-xl bg-primary-50 px-4 py-3">
@@ -170,12 +232,17 @@ export function CourseDetailContent({ courseId }: { courseId: string }) {
                         سيُخصَم رصيد دورة واحدة من اشتراكك — تسجيل مباشر بلا دفع
                       </p>
                     </div>
-                    <Button className="w-full sm:w-auto" loading={enroll.isPending} onClick={() => enroll.mutate(data.id)}>
+                    <Button className="w-full sm:w-auto" loading={enroll.isPending} onClick={startEnrollFlow}>
                       سجّلي في الدورة
                     </Button>
                   </>
                 ) : showPayment ? (
                   <div className="flex flex-col gap-3">
+                    {preferredTime && (
+                      <p className="text-xs text-muted">
+                        وقتك المفضّل: {formatArabicDate(preferredTime.date)} — {formatTimeLabel(preferredTime.time)}
+                      </p>
+                    )}
                     <PaymentMethodSelector
                       amount={data.price}
                       submitting={simulatedPayment.isPending || enroll.isPending}
@@ -187,7 +254,7 @@ export function CourseDetailContent({ courseId }: { courseId: string }) {
                     </Button>
                   </div>
                 ) : (
-                  <Button className="w-full sm:w-auto" onClick={() => setShowPayment(true)}>
+                  <Button className="w-full sm:w-auto" onClick={startEnrollFlow}>
                     سجّلي في الدورة
                   </Button>
                 )}

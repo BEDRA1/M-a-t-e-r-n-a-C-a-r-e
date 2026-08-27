@@ -31,6 +31,9 @@ export function useRegister() {
   return useMutation({
     mutationFn: (input: RegisterInput) => authRegister<{ user: User }>(input),
     onSuccess: (data) => {
+      // مسح أي بيانات محفوظة من جلسة سابقة في نفس التبويب (تسجيلات دورات، حجوزات...) قبل
+      // تعيين المستخدم الجديد — طبقة حماية إضافية ضد عرض بيانات مستخدم سابق لحظيًا
+      queryClient.clear();
       queryClient.setQueryData(["current-user"], data.user);
     },
   });
@@ -41,6 +44,7 @@ export function useLogin() {
   return useMutation({
     mutationFn: (input: LoginInput) => authLogin<{ user: User }>(input),
     onSuccess: (data) => {
+      queryClient.clear();
       queryClient.setQueryData(["current-user"], data.user);
     },
   });
