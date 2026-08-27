@@ -23,7 +23,7 @@ export function ProductCard({
   const atStockLimit = quantity >= product.stockQuantity;
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col !p-3 sm:!p-4">
       <div className="aspect-square overflow-hidden rounded-xl">
         <ImageWithFallback
           src={product.imageUrl}
@@ -34,33 +34,31 @@ export function ProductCard({
         />
       </div>
 
-      <div className="mt-3 flex flex-1 flex-col">
-        <div className="flex items-start justify-between gap-2">
-          <p className="min-w-0 flex-1 break-words font-bold text-foreground">{product.name}</p>
-          <Badge tone="neutral" className="shrink-0">{product.category}</Badge>
-        </div>
-        <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted">{product.description}</p>
+      <div className="mt-2.5 flex flex-1 flex-col sm:mt-3">
+        <p className="break-words font-bold text-foreground">{product.name}</p>
+        <Badge tone="neutral" className="mt-1.5 self-start">{product.category}</Badge>
+        <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted">{product.description}</p>
 
-        <div className="mt-3 flex items-center justify-end">
+        <div className="mt-2.5 flex items-center justify-end">
           <Badge tone={stockStatusBadgeTone(stockStatus)}>{stockStatusLabel(stockStatus)}</Badge>
         </div>
 
-        <div className="mt-3 flex items-center justify-center gap-2">
+        <div className="mt-2.5 flex items-center justify-center gap-1.5 sm:gap-2">
           <button
             type="button"
             onClick={onDecrement}
             disabled={quantity === 0}
-            className="flex size-11 items-center justify-center rounded-full border border-black/10 text-foreground transition-colors hover:bg-primary-50 disabled:opacity-40"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-black/10 text-foreground transition-colors hover:bg-primary-50 disabled:opacity-40 sm:size-11"
             aria-label="إنقاص الكمية"
           >
             <Minus className="size-3.5" strokeWidth={2.5} />
           </button>
-          <span className="w-6 text-center text-sm font-bold text-foreground">{quantity}</span>
+          <span className="w-5 shrink-0 text-center text-sm font-bold text-foreground">{quantity}</span>
           <button
             type="button"
             onClick={onIncrement}
             disabled={isOut || atStockLimit}
-            className="flex size-11 items-center justify-center rounded-full bg-primary-500 text-white transition-colors hover:bg-primary-600 disabled:opacity-40"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-500 text-white transition-colors hover:bg-primary-600 disabled:opacity-40 sm:size-11"
             aria-label="زيادة الكمية"
           >
             <Plus className="size-3.5" strokeWidth={2.5} />
