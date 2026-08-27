@@ -38,3 +38,4 @@ prisma/migrations/dev.db
 
 # TypeScript
 tsconfig.build.tsbuildinfo
+web/mc_frontend_log.txt 
