@@ -18,7 +18,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
-  @Throttle({ default: { limit: 3, ttl: 3_600_000 } })
+  @Throttle({ default: { limit: 10, ttl: 3_600_000 } })
   @Post('register')
   @ApiOperation({ summary: 'تسجيل مستخدم جديد (أم أو زوج)' })
   register(@Body() dto: RegisterDto) {

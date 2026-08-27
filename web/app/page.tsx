@@ -22,9 +22,9 @@ export default function LandingPage() {
       <SiteHeader />
       <main className="flex-1">
         <Hero />
+        <Testimonials />
         <Features />
         <HowItWorks />
-        <Testimonials />
         <IntroVideoSection />
         <CtaSection />
       </main>

@@ -2,12 +2,9 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { MapPin, Pill, Sprout } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { BrandMark } from "@/components/ui/BrandMark";
-import { ProgressBar } from "@/components/ui/ProgressBar";
-import { fadeUp, scaleIn, staggerContainer } from "@/lib/motion";
-import { MotherBabyGlow } from "@/components/landing/illustrations/MotherBabyGlow";
+import { fadeUp, staggerContainer } from "@/lib/motion";
 
 export function Hero() {
   return (
@@ -21,12 +18,12 @@ export function Hero() {
         aria-hidden
       />
       <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-16 sm:px-6 sm:pt-24 lg:px-8">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="flex justify-center">
           <motion.div
             initial="hidden"
             animate="visible"
             variants={staggerContainer(0.15)}
-            className="text-center lg:text-start"
+            className="max-w-3xl text-center"
           >
             <motion.span
               variants={fadeUp(0)}
@@ -46,10 +43,7 @@ export function Hero() {
               </span>
             </motion.h1>
 
-            <motion.p
-              variants={fadeUp(0)}
-              className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted lg:mx-0"
-            >
+            <motion.p variants={fadeUp(0)} className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted">
               Materna Care تجمع لكِ حاسبة حمل دقيقة، متابعة أسبوعية لتطور
               الجنين، تذكيرات صحية، وربطًا مباشرًا بزوجك ليعيش معك كل خطوة — في مكان
               واحد سهل وآمن.
@@ -57,7 +51,7 @@ export function Hero() {
 
             <motion.div
               variants={fadeUp(0)}
-              className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start"
+              className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
             >
               <Link href="/register">
                 <Button
@@ -76,60 +70,6 @@ export function Hero() {
                   لديّ حساب بالفعل
                 </Button>
               </Link>
-            </motion.div>
-          </motion.div>
-
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={scaleIn(0.3)}
-            className="relative mx-auto hidden w-full max-w-md lg:block"
-          >
-            <MotherBabyGlow className="pointer-events-none absolute -top-10 -end-10 size-28" />
-
-            <div className="relative rounded-[2rem] border border-black/5 bg-surface p-6 shadow-[var(--shadow-soft)]">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-foreground">متابعة الحمل الأسبوعية</span>
-                <span className="rounded-full bg-primary-100 px-2.5 py-1 text-xs font-medium text-primary-700">
-                  مثال توضيحي
-                </span>
-              </div>
-
-              <div className="mt-5">
-                <div className="flex items-baseline justify-between text-sm">
-                  <span className="font-semibold text-primary-700">الأسبوع ٢٤ + ٣ أيام</span>
-                  <span className="text-muted">٦٠٪</span>
-                </div>
-                <div className="mt-2">
-                  <ProgressBar percent={60} />
-                </div>
-              </div>
-
-              <div className="mt-6 rounded-2xl bg-primary-50/70 p-4">
-                <p className="text-xs font-medium text-primary-700">حجم الجنين تقريبًا</p>
-                <p className="mt-1 flex items-center gap-1.5 text-sm text-foreground">
-                  <Sprout className="size-4 text-primary-500" strokeWidth={2.25} />
-                  بحجم كوز الذرة
-                </p>
-              </div>
-
-              <div className="mt-4 flex items-center gap-2 rounded-2xl bg-accent-50/70 p-4">
-                <Pill className="size-5 shrink-0 text-accent-600" strokeWidth={2.25} />
-                <div>
-                  <p className="text-sm font-medium text-foreground">تذكير: حمض الفوليك</p>
-                  <p className="text-xs text-muted">اليوم الساعة ٨:٠٠ صباحًا</p>
-                </div>
-              </div>
-            </div>
-
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={scaleIn(0.55)}
-              className="absolute -bottom-6 -start-6 shadow-lg"
-              aria-hidden
-            >
-              <BrandMark className="size-20 rounded-2xl" />
             </motion.div>
           </motion.div>
         </div>
