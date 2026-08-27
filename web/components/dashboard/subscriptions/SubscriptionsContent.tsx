@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Crown } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Alert } from "@/components/ui/Alert";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -9,6 +10,8 @@ import { ApiError } from "@/lib/api-client";
 import { useMySubscriptions, useSubscriptionPlans } from "@/lib/hooks/useSubscriptions";
 import type { SubscriptionPlan } from "@/lib/types";
 import { SubscriptionCrownIllustration } from "@/components/dashboard/illustrations/SubscriptionCrownIllustration";
+import { ArticlesPreviewSection } from "./ArticlesPreviewSection";
+import { MothersSupportSection } from "./MothersSupportSection";
 import { PlanCard } from "./PlanCard";
 import { PaymentOverlay } from "./PaymentOverlay";
 import { CurrentSubscriptionCard } from "./CurrentSubscriptionCard";
@@ -21,8 +24,13 @@ export function SubscriptionsContent() {
   const activeSubscription = mySubscriptions.data?.find((s) => s.status === "active");
 
   return (
-    <div>
-      <section className="flex flex-col items-center gap-6 text-center sm:flex-row sm:text-start">
+    <div className="flex flex-col gap-10">
+      <ArticlesPreviewSection />
+
+      <MothersSupportSection />
+
+      <section>
+      <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:text-start">
         <SubscriptionCrownIllustration className="size-28 shrink-0 sm:size-32" />
         <div>
           <Badge tone="primary" className="mx-auto sm:mx-0">
@@ -30,10 +38,15 @@ export function SubscriptionsContent() {
           </Badge>
           <h1 className="mt-3 text-2xl font-extrabold text-foreground sm:text-3xl">الخدمات الإضافية</h1>
         </div>
-      </section>
+      </div>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted sm:text-base">
         اختاري الباقة التي تناسب احتياجاتك خلال رحلة الحمل والنفاس، واستفيدي من استشارات ودورات مجانية ضمن اشتراكك.
       </p>
+
+      <div className="mt-8 flex items-center gap-2">
+        <Crown className="size-5 text-primary-500" strokeWidth={2} />
+        <h2 className="font-bold text-foreground">باقاتنا المميزة</h2>
+      </div>
 
       {plans.isLoading || mySubscriptions.isLoading ? (
         <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -96,6 +109,7 @@ export function SubscriptionsContent() {
           </Alert>
         </div>
       )}
+      </section>
 
       {selectedPlan && <PaymentOverlay plan={selectedPlan} onClose={() => setSelectedPlan(null)} />}
     </div>
