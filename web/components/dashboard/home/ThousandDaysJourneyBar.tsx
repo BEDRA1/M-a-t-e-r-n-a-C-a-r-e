@@ -217,13 +217,15 @@ export function ThousandDaysJourneyBar() {
                 </motion.span>
               </div>
 
-              {/* right الفعلي (لا left) لنفس سبب طبقة التعبئة أعلاه — اليوم 1 يمينًا، 1000 يسارًا */}
-              <div className="relative mb-4 h-3 text-[9px] text-gray-400">
-                {TICKS.map((day) => (
+              {/* right الفعلي (لا left) لنفس سبب طبقة التعبئة أعلاه — اليوم 1 يمينًا، 1000 يسارًا.
+                  270/310/365 قريبة جدًا من بعضها على مقياس 1000 يوم (تتزاحم نصوصها) — تُرفَع
+                  الأرقام الفردية الترتيب سطرًا لتفادي التداخل، حل شائع لمحاور مزدحمة */}
+              <div className="relative mb-5 h-6 text-[8px] text-gray-400">
+                {TICKS.map((day, i) => (
                   <span
                     key={day}
                     className="absolute translate-x-1/2"
-                    style={{ right: `${(day / TOTAL_DAYS) * 100}%` }}
+                    style={{ right: `${(day / TOTAL_DAYS) * 100}%`, top: i % 2 === 0 ? 0 : "10px" }}
                   >
                     {day}
                   </span>
