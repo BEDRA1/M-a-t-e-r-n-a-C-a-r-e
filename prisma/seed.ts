@@ -1547,9 +1547,10 @@ const WEEKLY_MEALS_SEED: {
 
 const HOME_SERVICE_CLEANING_IMAGE = 'https://images.unsplash.com/photo-1758273238415-01ec03d9ef27?w=600&q=80&auto=format&fit=crop';
 const HOME_SERVICE_COOKING_IMAGE = 'https://images.unsplash.com/photo-1758522484068-4ba2b78add9e?w=600&q=80&auto=format&fit=crop';
-// صورة ممرضة حقيقية موجودة فعلاً في public/services/ (مستخدمة أيضًا لشبكة الرئيسية) — إعادة
-// استخدام مسار محلي بدل رابط Unsplash خارجي لخدمة "التمريض المنزلي" تحديدًا كما طُلب صراحةً
-const HOME_SERVICE_CARE_IMAGE = '/services/health.jpg';
+// كانت هذه الخدمة تستخدم /services/health.jpg (صورة استشارة طبية بجهاز لوحي، مخصَّصة فعليًا
+// لبطاقة "المرافقة الصحية" في MobileHomeContent.tsx) — لا تُظهر ممرضة حقيقية تعتني بمولود في
+// المنزل كما يقتضي وصف هذه الخدمة تحديدًا، فاستُبدلت بصورة ممرضة حقيقية تحمل مولودًا
+const HOME_SERVICE_CARE_IMAGE = 'https://images.unsplash.com/photo-1701557774749-2f2c603c7995?w=600&q=80&auto=format&fit=crop';
 
 const HOME_SERVICES_SEED: { name: string; description: string; basePrice: number; category: string; imageUrl: string }[] = [
   {

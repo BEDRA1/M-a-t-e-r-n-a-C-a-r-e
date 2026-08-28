@@ -6,7 +6,7 @@ import { Play } from "lucide-react";
 import { fadeUp, viewportOnce } from "@/lib/motion";
 
 /** قسم الفيديو التعريفي — يبدأ بغلاف ساكن (بديل صورة poster غير متوفرة)، وينتقل عند
- * الضغط لعنصر <video> حقيقي يشغّل public/videos/intro.mp4 فعليًا */
+ * الضغط لعنصر <video> حقيقي يشغّل public/videos/hero-intro.mp4 فعليًا */
 export function IntroVideoSection() {
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -21,7 +21,7 @@ export function IntroVideoSection() {
       >
         {isPlaying ? (
           <video controls autoPlay className="aspect-video w-full rounded-2xl bg-gray-900">
-            <source src="/videos/intro.mp4" type="video/mp4" />
+            <source src="/videos/hero-intro.mp4" type="video/mp4" />
           </video>
         ) : (
           <button
