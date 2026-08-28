@@ -1456,20 +1456,93 @@ const WEEKLY_MEALS_SEED: {
   price: number;
   imageUrl: string;
 }[] = [
-  { dayOfWeek: 0, mealType: MealType.lunch, name: 'كسكس بالخضر', description: 'كسكس تقليدي بالخضروات الموسمية ومرق أحمر خفيف', price: 400, imageUrl: 'https://images.unsplash.com/photo-1762631934518-f75e233413ca?w=600&q=80&auto=format&fit=crop' },
-  { dayOfWeek: 0, mealType: MealType.dinner, name: 'شوربة فريك بالدجاج', description: 'شوربة فريك تقليدية مطهية بقطع الدجاج والأعشاب', price: 350, imageUrl: 'https://images.unsplash.com/photo-1574653853027-5382a3d23a15?w=600&q=80&auto=format&fit=crop' },
-  { dayOfWeek: 1, mealType: MealType.lunch, name: 'رشتة بالدجاج والحمص', description: 'رشتة منزلية بمرق الدجاج والحمص والبهارات العربية', price: 380, imageUrl: 'https://images.unsplash.com/photo-1544378730-5e409d0e649e?w=600&q=80&auto=format&fit=crop' },
-  { dayOfWeek: 1, mealType: MealType.dinner, name: 'مقرونة بالصلصة والكفتة', description: 'مقرونة بصلصة طماطم منزلية وكفتة اللحم المفروم', price: 320, imageUrl: 'https://images.unsplash.com/photo-1635264685671-739e75e73e0f?w=600&q=80&auto=format&fit=crop' },
-  { dayOfWeek: 2, mealType: MealType.lunch, name: 'طاجين زيتون بالدجاج', description: 'دجاج مطهو ببطء مع الزيتون الأخضر والليمون المخلل', price: 420, imageUrl: 'https://images.unsplash.com/photo-1517314626714-ac1b9a16515e?w=600&q=80&auto=format&fit=crop' },
-  { dayOfWeek: 2, mealType: MealType.dinner, name: 'شخشوخة', description: 'رقائق عجين مطهية بمرق اللحم والحمص التقليدي', price: 340, imageUrl: 'https://images.unsplash.com/photo-1708782340354-96cdbd9f70d6?w=600&q=80&auto=format&fit=crop' },
-  { dayOfWeek: 3, mealType: MealType.lunch, name: 'لوبيا بالطماطم واللحم', description: 'لوبيا بيضاء مطهية مع قطع اللحم وصلصة الطماطم', price: 400, imageUrl: 'https://images.unsplash.com/photo-1563897539633-7374c276c212?w=600&q=80&auto=format&fit=crop' },
-  { dayOfWeek: 3, mealType: MealType.dinner, name: 'حريرة بالفريك', description: 'حريرة تقليدية غنية بالفريك والخضروات والأعشاب', price: 300, imageUrl: 'https://images.unsplash.com/photo-1620418025834-f4379baf1de9?w=600&q=80&auto=format&fit=crop' },
-  { dayOfWeek: 4, mealType: MealType.lunch, name: 'كسكس بالسمك', description: 'كسكس ساحلي بقطع السمك الطازج والخضروات', price: 450, imageUrl: 'https://images.unsplash.com/photo-1600699899970-b1c9fadd8f9e?w=600&q=80&auto=format&fit=crop' },
-  { dayOfWeek: 4, mealType: MealType.dinner, name: 'بطاطا مطهية باللحم', description: 'بطاطا وجزر مطهيان ببطء مع قطع اللحم ومرق البهارات', price: 380, imageUrl: 'https://images.unsplash.com/photo-1689860892307-7db54ab276ba?w=600&q=80&auto=format&fit=crop' },
-  { dayOfWeek: 5, mealType: MealType.lunch, name: 'كسكس تقليدي بلحم الخروف', description: 'كسكس يوم الجمعة التقليدي بلحم الخروف والخضروات السبع', price: 450, imageUrl: 'https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=600&q=80&auto=format&fit=crop' },
-  { dayOfWeek: 5, mealType: MealType.dinner, name: 'شوربة الخضر', description: 'شوربة خضروات طازجة خفيفة مناسبة لمساء الجمعة', price: 320, imageUrl: 'https://images.unsplash.com/photo-1559561723-c3f4195835db?w=600&q=80&auto=format&fit=crop' },
-  { dayOfWeek: 6, mealType: MealType.lunch, name: 'دولمة الخضر المحشية', description: 'فلفل وكوسة وباذنجان محشو بالأرز واللحم المفروم', price: 420, imageUrl: 'https://images.unsplash.com/photo-1759679134771-835a874351fe?w=600&q=80&auto=format&fit=crop' },
-  { dayOfWeek: 6, mealType: MealType.dinner, name: 'مطبق بيض بالخضر', description: 'أومليت جزائري بالبيض والخضر والجبن', price: 300, imageUrl: 'https://images.unsplash.com/photo-1510693206972-df098062cb71?w=600&q=80&auto=format&fit=crop' },
+  // بلا أسعار بطلب صريح (price: 0 لكل الوجبات) — واجهة بطاقة الوجبة (MealItemRow) لا تعرض
+  // السعر أصلًا، لكن سلة الطلب (MealCartPanel) لا تزال تعرض المجموع من هذا الحقل، فستظهر
+  // "0 دج" هناك؛ هذا انعكاس مباشر ومقصود لطلب "بدون أسعار" لا خطأ
+  {
+    dayOfWeek: 0, mealType: MealType.lunch,
+    name: 'صدر دجاج مشوي بالأعشاب + أرز بالخضر + سلطة مشكلة + برتقال',
+    description: 'صدر دجاج مشوي متبّل بالأعشاب الطازجة، مع أرز بالخضر وسلطة مشكلة وحبة برتقال.',
+    price: 0, imageUrl: 'https://images.unsplash.com/photo-1762631934518-f75e233413ca?w=600&q=80&auto=format&fit=crop',
+  },
+  {
+    dayOfWeek: 0, mealType: MealType.dinner,
+    name: 'شوربة خضر + عجة بالخضر + خبز كامل + ياغورت طبيعي',
+    description: 'شوربة خضروات دافئة، عجة بالخضر، خبز كامل الحبوب، وكوب ياغورت طبيعي.',
+    price: 0, imageUrl: 'https://images.unsplash.com/photo-1574653853027-5382a3d23a15?w=600&q=80&auto=format&fit=crop',
+  },
+  {
+    dayOfWeek: 1, mealType: MealType.lunch,
+    name: 'مرقة عدس بالدجاج + خبز كامل + سلطة جزر وذرة + تفاحة',
+    description: 'مرقة عدس مطهية بقطع الدجاج، مع خبز كامل الحبوب وسلطة جزر وذرة وحبة تفاح.',
+    price: 0, imageUrl: 'https://images.unsplash.com/photo-1544378730-5e409d0e649e?w=600&q=80&auto=format&fit=crop',
+  },
+  {
+    dayOfWeek: 1, mealType: MealType.dinner,
+    name: 'سلطة تونة مع الذرة والخس + خبز كامل + لبن',
+    description: 'سلطة تونة طازجة مع الذرة والخس، خبز كامل الحبوب، وكوب لبن.',
+    price: 0, imageUrl: 'https://images.unsplash.com/photo-1635264685671-739e75e73e0f?w=600&q=80&auto=format&fit=crop',
+  },
+  {
+    dayOfWeek: 2, mealType: MealType.lunch,
+    name: 'طاجين كفتة بالصلصة والبطاطا + بطاطا في الفرن + سلطة موسمية + فاكهة الموسم',
+    description: 'طاجين كفتة اللحم المفروم بصلصة الطماطم والبطاطا، مع بطاطا مشوية بالفرن وسلطة وفاكهة موسمية.',
+    price: 0, imageUrl: 'https://images.unsplash.com/photo-1517314626714-ac1b9a16515e?w=600&q=80&auto=format&fit=crop',
+  },
+  {
+    dayOfWeek: 2, mealType: MealType.dinner,
+    name: 'حساء الشعير + جبن قليل الدسم + خبز كامل + تمرتان',
+    description: 'حساء الشعير الدافئ، مع جبن قليل الدسم وخبز كامل الحبوب وتمرتين.',
+    price: 0, imageUrl: 'https://images.unsplash.com/photo-1708782340354-96cdbd9f70d6?w=600&q=80&auto=format&fit=crop',
+  },
+  {
+    dayOfWeek: 3, mealType: MealType.lunch,
+    name: 'كسكس بالخضر والدجاج + سلطة + برتقال',
+    description: 'كسكس تقليدي بالخضروات الموسمية وقطع الدجاج، مع سلطة وحبة برتقال.',
+    price: 0, imageUrl: 'https://images.unsplash.com/photo-1563897539633-7374c276c212?w=600&q=80&auto=format&fit=crop',
+  },
+  {
+    dayOfWeek: 3, mealType: MealType.dinner,
+    name: 'سلطة بطاطا مسلوقة مع البيض والقدونس + لبن',
+    description: 'سلطة بطاطا مسلوقة مع البيض المسلوق والقدونس الطازج، مع كوب لبن.',
+    price: 0, imageUrl: 'https://images.unsplash.com/photo-1620418025834-f4379baf1de9?w=600&q=80&auto=format&fit=crop',
+  },
+  {
+    dayOfWeek: 4, mealType: MealType.lunch,
+    name: 'سمك مشوي + أرز بالخضر + سلطة خيار وطماطم + إجاص',
+    description: 'سمك طازج مشوي، مع أرز بالخضر وسلطة خيار وطماطم وحبة إجاص.',
+    price: 0, imageUrl: 'https://images.unsplash.com/photo-1600699899970-b1c9fadd8f9e?w=600&q=80&auto=format&fit=crop',
+  },
+  {
+    dayOfWeek: 4, mealType: MealType.dinner,
+    name: 'شوربة قرع (يقطين) + خبز طازج + خبز كامل + ياغورت طبيعي',
+    description: 'شوربة قرع دافئة وكريمية، مع خبز طازج وخبز كامل الحبوب وكوب ياغورت طبيعي.',
+    price: 0, imageUrl: 'https://images.unsplash.com/photo-1689860892307-7db54ab276ba?w=600&q=80&auto=format&fit=crop',
+  },
+  {
+    dayOfWeek: 5, mealType: MealType.lunch,
+    name: 'لوبيا باللحم + سلطة خضراء + فاكهة الموسم',
+    description: 'لوبيا بيضاء مطهية بقطع اللحم، مع سلطة خضراء وفاكهة موسمية.',
+    price: 0, imageUrl: 'https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=600&q=80&auto=format&fit=crop',
+  },
+  {
+    dayOfWeek: 5, mealType: MealType.dinner,
+    name: 'حريرة خفيفة + بيض مسلوق + لبن',
+    description: 'حريرة خفيفة، مع بيضة مسلوقة وكوب لبن.',
+    price: 0, imageUrl: 'https://images.unsplash.com/photo-1559561723-c3f4195835db?w=600&q=80&auto=format&fit=crop',
+  },
+  {
+    dayOfWeek: 6, mealType: MealType.lunch,
+    name: 'طاجين دجاج بالخضر الموسمية + برغل أو فريك + سلطة + تمرتين',
+    description: 'طاجين دجاج بالخضروات الموسمية، مع برغل أو فريك وسلطة وتمرتين.',
+    price: 0, imageUrl: 'https://images.unsplash.com/photo-1759679134771-835a874351fe?w=600&q=80&auto=format&fit=crop',
+  },
+  {
+    dayOfWeek: 6, mealType: MealType.dinner,
+    name: 'حساء خضر + ساندويتش دجاج صحي بخبز كامل + ياغورت طبيعي',
+    description: 'حساء خضر دافئ، مع ساندويتش دجاج صحي بخبز كامل الحبوب وكوب ياغورت طبيعي.',
+    price: 0, imageUrl: 'https://images.unsplash.com/photo-1510693206972-df098062cb71?w=600&q=80&auto=format&fit=crop',
+  },
 ];
 
 const HOME_SERVICE_CLEANING_IMAGE = 'https://images.unsplash.com/photo-1758273238415-01ec03d9ef27?w=600&q=80&auto=format&fit=crop';
@@ -2470,7 +2543,18 @@ async function main() {
       where: { weekStartDate: currentWeekStart, dayOfWeek: meal.dayOfWeek, mealType: meal.mealType },
     });
     if (existing) {
-      await prisma.weeklyMeal.update({ where: { id: existing.id }, data: { imageUrl: meal.imageUrl } });
+      // كان هذا التحديث يُحدّث imageUrl فقط ويترك الاسم/الوصف/السعر القديمة كما هي — لو
+      // بقي على حاله لَما ظهر المنيو الجديد فعليًا عند إعادة تشغيل الـseed (اكتُشف أثناء
+      // تنفيذ طلب استبدال المنيو الكامل، نفس عائلة الخلل الذي أُصلح سابقًا في seed الأخصائيين)
+      await prisma.weeklyMeal.update({
+        where: { id: existing.id },
+        data: {
+          name: meal.name,
+          description: meal.description,
+          price: meal.price,
+          imageUrl: meal.imageUrl,
+        },
+      });
     } else {
       await prisma.weeklyMeal.create({
         data: {
