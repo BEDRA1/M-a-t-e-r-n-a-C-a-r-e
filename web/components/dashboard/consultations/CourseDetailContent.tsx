@@ -29,13 +29,7 @@ import { useCurrentUser } from "@/lib/hooks/useAuth";
 import { useSimulatedPayment, type BaridimobPaymentData, type CardPaymentData, type PaymentMethodKind } from "@/lib/hooks/useSimulatedPayment";
 import { ApiError } from "@/lib/api-client";
 import { courseCoverImage, TRACKS } from "@/lib/tracks";
-
-/** الـBackend الحالي لا يملك حقل لوقت مفضّل لدورة (لها startDate ثابت أصلًا يحدّده الأخصائي) —
- * تحقّقتُ من courses.controller.ts: enroll() لا يقبل أي @Body() إطلاقًا. لذا يُحفَظ الوقت
- * المفضّل محليًا فقط (localStorage) كتذكير شخصي للمستخدمة، ولا يُرسَل للخادم */
-function preferredTimeStorageKey(courseId: string): string {
-  return `mc_course_preferred_time_${courseId}`;
-}
+import { preferredTimeStorageKey } from "@/lib/coursePreferredTime";
 
 export function CourseDetailContent({ courseId }: { courseId: string }) {
   const course = useCourse(courseId);
