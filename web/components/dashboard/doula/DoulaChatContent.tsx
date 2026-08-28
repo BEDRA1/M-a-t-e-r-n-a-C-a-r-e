@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { MessageCircleQuestion } from "lucide-react";
+import { MessageCircleQuestion, Send } from "lucide-react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { MotherBubble, DoulaBubble } from "./ChatBubble";
@@ -18,9 +18,15 @@ type ChatItem =
   | { kind: "questions"; id: string; categoryId: string }
   | { kind: "mother-question"; id: string; text: string }
   | { kind: "typing"; id: string }
-  | { kind: "answer"; id: string; entryId: string };
+  | { kind: "answer"; id: string; entryId: string }
+  | { kind: "free-text-answer"; id: string };
 
 const ANSWER_DELAY_MS = 600;
+/** طلب صريح: "بعد ثانية" — أبطأ عمدًا من ردود الأسئلة الجاهزة (600ms) لإعطاء إحساس
+ * "تفكير" حقيقي بما أن السؤال هنا حر غير معروف مسبقًا */
+const FREE_TEXT_ANSWER_DELAY_MS = 1000;
+const FREE_TEXT_CANNED_REPLY =
+  "شكراً لسؤالك. للحصول على إجابة دقيقة، نوصيك باستشارة إحدى أخصائياتنا مباشرة.";
 
 let idCounter = 0;
 function nextId() {
@@ -37,6 +43,7 @@ export function DoulaChatContent() {
     },
     { kind: "categories", id: nextId() },
   ]);
+  const [freeText, setFreeText] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const chatPanelRef = useRef<HTMLDivElement>(null);
 
@@ -73,6 +80,24 @@ export function DoulaChatContent() {
       { kind: "doula-text", id: nextId(), text: "تفضّلي، أي موضوع آخر تودين السؤال عنه؟" },
       { kind: "categories", id: nextId() },
     ]);
+  };
+
+  const submitFreeText = () => {
+    const text = freeText.trim();
+    if (!text) return;
+    setFreeText("");
+    const typingId = nextId();
+    setItems((prev) => [
+      ...prev,
+      { kind: "mother-question", id: nextId(), text },
+      { kind: "typing", id: typingId },
+    ]);
+    setTimeout(() => {
+      setItems((prev) => [
+        ...prev.filter((item) => item.id !== typingId),
+        { kind: "free-text-answer", id: nextId() },
+      ]);
+    }, FREE_TEXT_ANSWER_DELAY_MS);
   };
 
   return (
@@ -126,6 +151,17 @@ export function DoulaChatContent() {
                     onShowCategories={showCategories}
                   />
                 );
+              case "free-text-answer":
+                return (
+                  <div key={item.id} className="flex flex-col gap-2">
+                    <DoulaBubble>{FREE_TEXT_CANNED_REPLY}</DoulaBubble>
+                    <div className="flex justify-end">
+                      <Link href="/dashboard/consultations">
+                        <Button size="sm">احجزي استشارة الآن</Button>
+                      </Link>
+                    </div>
+                  </div>
+                );
               default:
                 return null;
             }
@@ -142,6 +178,26 @@ export function DoulaChatContent() {
               لم أجد إجابتي — أريد استشارة
             </Button>
           </Link>
+
+          <form
+            className="flex items-center gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              submitFreeText();
+            }}
+          >
+            <input
+              type="text"
+              value={freeText}
+              onChange={(e) => setFreeText(e.target.value)}
+              placeholder="اكتبي سؤالك هنا..."
+              className="min-w-0 flex-1 rounded-full border border-black/10 bg-surface px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-300"
+            />
+            <Button type="submit" size="sm" disabled={!freeText.trim()} className="shrink-0">
+              <Send className="size-4" strokeWidth={2} />
+              إرسال
+            </Button>
+          </form>
         </div>
       </div>
     </div>
