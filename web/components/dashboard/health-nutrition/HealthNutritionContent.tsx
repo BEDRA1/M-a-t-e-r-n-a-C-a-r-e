@@ -94,7 +94,7 @@ function WeeklyMealsSection() {
             <p>لم تُنشر قائمة وجبات لهذا الأسبوع بعد.</p>
           </Card>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+          <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
             <WeekMealsGrid
               meals={weeklyMeals.data}
               cart={cart}

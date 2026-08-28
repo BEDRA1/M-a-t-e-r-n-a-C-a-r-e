@@ -40,7 +40,7 @@ export function WeekMealsGrid({
   const dayMeals = byDay.get(activeDay) ?? [];
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex min-w-0 w-full max-w-full flex-col gap-5">
       <HorizontalScroller>
         {days.map((day) => {
           const isActive = day === activeDay;
