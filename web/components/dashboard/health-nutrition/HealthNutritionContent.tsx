@@ -77,10 +77,12 @@ function WeeklyMealsSection() {
 
       <div className="mt-5">
         {weeklyMeals.isLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            <Skeleton className="h-64 w-full" />
-            <Skeleton className="h-64 w-full" />
-            <Skeleton className="h-64 w-full" />
+          <div className="flex flex-col gap-5">
+            <Skeleton className="h-10 w-full max-w-md" />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <Skeleton className="h-64 w-full" />
+              <Skeleton className="h-64 w-full" />
+            </div>
           </div>
         ) : weeklyMeals.isError ? (
           <Alert tone="error">

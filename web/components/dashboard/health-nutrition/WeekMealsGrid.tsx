@@ -1,9 +1,10 @@
 "use client";
 
-import { Card } from "@/components/ui/Card";
+import { useMemo, useState } from "react";
+import { HorizontalScroller } from "@/components/ui/HorizontalScroller";
 import { dayOfWeekLabel } from "@/lib/format";
 import type { WeeklyMeal } from "@/lib/types";
-import { MealItemRow } from "./MealItemRow";
+import { MealDayCard } from "./MealDayCard";
 
 export function WeekMealsGrid({
   meals,
@@ -16,38 +17,59 @@ export function WeekMealsGrid({
   onIncrement: (meal: WeeklyMeal) => void;
   onDecrement: (mealId: string) => void;
 }) {
-  const byDay = new Map<number, WeeklyMeal[]>();
-  for (const meal of meals) {
-    const list = byDay.get(meal.dayOfWeek) ?? [];
-    list.push(meal);
-    byDay.set(meal.dayOfWeek, list);
-  }
+  const byDay = useMemo(() => {
+    const map = new Map<number, WeeklyMeal[]>();
+    for (const meal of meals) {
+      const list = map.get(meal.dayOfWeek) ?? [];
+      list.push(meal);
+      map.set(meal.dayOfWeek, list);
+    }
+    return map;
+  }, [meals]);
 
-  const days = Array.from({ length: 7 }, (_, day) => day).filter((day) => byDay.has(day));
+  const days = useMemo(
+    () => Array.from({ length: 7 }, (_, day) => day).filter((day) => byDay.has(day)),
+    [byDay],
+  );
+
+  const todayDayOfWeek = new Date().getDay();
+  const [selectedDay, setSelectedDay] = useState(() =>
+    days.includes(todayDayOfWeek) ? todayDayOfWeek : (days[0] ?? 0),
+  );
+  const activeDay = days.includes(selectedDay) ? selectedDay : (days[0] ?? 0);
+  const dayMeals = byDay.get(activeDay) ?? [];
 
   return (
-    // كل بطاقة يوم تحتوي عدّة صفوف وجبات (لا وجبة واحدة كبطاقات المنتجات/الخدمات)، فكثافة
-    // المعلومات أعلى بكثير — جرّبت شبكة عمودين وتحقّقت بلقطة شاشة حقيقية أن الأمر ينتج نصًا
-    // مقطوعًا لحرف واحد داخل MealItemRow (صورة+نص+عدّاد لا يسع عرض العمود الضيق)، فحتى بعد
-    // ضغط MealItemRow ليصبح عموديًا على الهاتف (انظر تعليقه) يبقى عرض بطاقة اليوم بعمودين غير
-    // كافٍ لصف العدّاد وحده؛ أبقيت بطاقات الأيام عمودًا واحدًا على الهاتف لهذا السبب تحديدًا
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      {days.map((day) => (
-        <Card key={day} className="flex flex-col gap-3">
-          <p className="font-bold text-foreground">{dayOfWeekLabel(day)}</p>
-          <div className="flex flex-col gap-2.5">
-            {byDay.get(day)!.map((meal) => (
-              <MealItemRow
-                key={meal.id}
-                meal={meal}
-                quantity={cart[meal.id] ?? 0}
-                onIncrement={() => onIncrement(meal)}
-                onDecrement={() => onDecrement(meal.id)}
-              />
-            ))}
-          </div>
-        </Card>
-      ))}
+    <div className="flex flex-col gap-5">
+      <HorizontalScroller>
+        {days.map((day) => {
+          const isActive = day === activeDay;
+          return (
+            <button
+              key={day}
+              type="button"
+              onClick={() => setSelectedDay(day)}
+              className={`shrink-0 snap-start rounded-full px-4 py-2 text-sm font-bold transition-colors ${
+                isActive ? "bg-primary-500 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              {dayOfWeekLabel(day)}
+            </button>
+          );
+        })}
+      </HorizontalScroller>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {dayMeals.map((meal) => (
+          <MealDayCard
+            key={meal.id}
+            meal={meal}
+            quantity={cart[meal.id] ?? 0}
+            onIncrement={() => onIncrement(meal)}
+            onDecrement={() => onDecrement(meal.id)}
+          />
+        ))}
+      </div>
     </div>
   );
 }
