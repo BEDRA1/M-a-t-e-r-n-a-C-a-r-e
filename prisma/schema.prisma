@@ -71,6 +71,8 @@ enum NotificationType {
   booking_confirmed
   appointment_reminder
   general
+  vaccination_reminder
+  daily_tip
 }
 
 enum SpecialistStatus {
@@ -363,6 +365,19 @@ model DailyTip {
   tipTextAr String @map("tip_text_ar")
 
   @@map("daily_tips")
+}
+
+// نصائح إشعار "الجانب النفسي/الصحي/الغذائي" اليومية — منفصلة عن DailyTip عمدًا (تلك تُستخدَم
+// كبطاقة "نصيحة اليوم" في صفحة النفاس فقط)، لأن هذه تُرسَل كإشعارات حقيقية لكل المستخدمات
+// عبر DailyWellnessTipScheduler، فخلطها في نفس الجدول كان سيُدخل نصائح الحمل ضمن تناوب نصائح
+// النفاس والعكس
+model WellnessTip {
+  id        String @id @default(uuid())
+  tipNumber Int    @unique @map("tip_number")
+  category  String
+  tipTextAr String @map("tip_text_ar")
+
+  @@map("wellness_tips")
 }
 
 model Notification {
