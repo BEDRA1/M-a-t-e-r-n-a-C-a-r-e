@@ -75,7 +75,12 @@ export interface Family {
   createdAt: string;
 }
 
-export type NotificationType = "booking_confirmed" | "appointment_reminder" | "general";
+export type NotificationType =
+  | "booking_confirmed"
+  | "appointment_reminder"
+  | "general"
+  | "vaccination_reminder"
+  | "daily_tip";
 
 export interface Notification {
   id: string;

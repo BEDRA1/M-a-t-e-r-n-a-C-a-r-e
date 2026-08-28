@@ -12,7 +12,13 @@ import { TestimonialForm } from "./TestimonialForm";
 import { DataPrivacySection } from "./DataPrivacySection";
 import type { NotificationType } from "@/lib/types";
 
-const SENT_NOTIFICATION_TYPES: NotificationType[] = ["appointment_reminder", "booking_confirmed", "general"];
+const SENT_NOTIFICATION_TYPES: NotificationType[] = [
+  "appointment_reminder",
+  "booking_confirmed",
+  "general",
+  "vaccination_reminder",
+  "daily_tip",
+];
 
 export function SettingsContent() {
   const logout = useLogout();

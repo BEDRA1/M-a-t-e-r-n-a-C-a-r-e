@@ -58,6 +58,8 @@ const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   booking_confirmed: "تأكيد حجز",
   appointment_reminder: "تذكير بموعد",
   general: "عام",
+  vaccination_reminder: "تذكير بالتلقيحات",
+  daily_tip: "نصيحة اليوم",
 };
 
 export function notificationTypeLabel(type: NotificationType): string {
