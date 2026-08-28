@@ -11,6 +11,7 @@ import { CategoryButtons } from "./CategoryButtons";
 import { QuestionButtons } from "./QuestionButtons";
 import { AnswerMessage } from "./AnswerMessage";
 import { DoulaRobotIllustration } from "./DoulaRobotIllustration";
+import { getDoulaResponse } from "@/lib/doula-responses";
 
 type ChatItem =
   | { kind: "doula-text"; id: string; text: string }
@@ -19,14 +20,12 @@ type ChatItem =
   | { kind: "mother-question"; id: string; text: string }
   | { kind: "typing"; id: string }
   | { kind: "answer"; id: string; entryId: string }
-  | { kind: "free-text-answer"; id: string };
+  | { kind: "free-text-answer"; id: string; response: string };
 
 const ANSWER_DELAY_MS = 600;
 /** طلب صريح: "بعد ثانية" — أبطأ عمدًا من ردود الأسئلة الجاهزة (600ms) لإعطاء إحساس
  * "تفكير" حقيقي بما أن السؤال هنا حر غير معروف مسبقًا */
 const FREE_TEXT_ANSWER_DELAY_MS = 1000;
-const FREE_TEXT_CANNED_REPLY =
-  "شكراً لسؤالك. للحصول على إجابة دقيقة، نوصيك باستشارة إحدى أخصائياتنا مباشرة.";
 
 let idCounter = 0;
 function nextId() {
@@ -87,6 +86,7 @@ export function DoulaChatContent() {
     if (!text) return;
     setFreeText("");
     const typingId = nextId();
+    const response = getDoulaResponse(text);
     setItems((prev) => [
       ...prev,
       { kind: "mother-question", id: nextId(), text },
@@ -95,7 +95,7 @@ export function DoulaChatContent() {
     setTimeout(() => {
       setItems((prev) => [
         ...prev.filter((item) => item.id !== typingId),
-        { kind: "free-text-answer", id: nextId() },
+        { kind: "free-text-answer", id: nextId(), response },
       ]);
     }, FREE_TEXT_ANSWER_DELAY_MS);
   };
@@ -154,7 +154,7 @@ export function DoulaChatContent() {
               case "free-text-answer":
                 return (
                   <div key={item.id} className="flex flex-col gap-2">
-                    <DoulaBubble>{FREE_TEXT_CANNED_REPLY}</DoulaBubble>
+                    <DoulaBubble>{item.response}</DoulaBubble>
                     <div className="flex justify-end">
                       <Link href="/dashboard/consultations">
                         <Button size="sm">احجزي استشارة الآن</Button>
@@ -190,7 +190,7 @@ export function DoulaChatContent() {
               type="text"
               value={freeText}
               onChange={(e) => setFreeText(e.target.value)}
-              placeholder="اكتبي سؤالك هنا..."
+              placeholder="اكتبي رسالتك هنا..."
               className="min-w-0 flex-1 rounded-full border border-black/10 bg-surface px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-300"
             />
             <Button type="submit" size="sm" disabled={!freeText.trim()} className="shrink-0">
