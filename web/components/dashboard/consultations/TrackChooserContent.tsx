@@ -21,7 +21,7 @@ export function TrackChooserContent() {
         initial={shouldReduceMotion ? false : "hidden"}
         animate="visible"
         variants={staggerContainer(0.08)}
-        className="grid grid-cols-1 gap-5 sm:grid-cols-3"
+        className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
       >
         {TRACK_LIST.map((track) => {
           const Icon = track.icon;
@@ -30,23 +30,27 @@ export function TrackChooserContent() {
               <Link
                 href={`/dashboard/consultations/${track.code}`}
                 className={cn(
-                  "flex min-h-28 flex-col gap-4 rounded-[var(--radius-card)] border-2 bg-surface p-6 shadow-[var(--shadow-soft)] transition-all duration-200 hover:-translate-y-1 hover:shadow-xl active:scale-[0.99]",
+                  "flex min-h-28 w-full max-w-full flex-col gap-4 overflow-hidden rounded-[var(--radius-card)] border-2 bg-surface p-6 shadow-[var(--shadow-soft)] transition-all duration-200 hover:-translate-y-1 hover:shadow-xl active:scale-[0.99]",
                   track.colors.border,
                 )}
               >
                 <span
                   className={cn(
-                    "flex size-14 items-center justify-center rounded-2xl text-white",
+                    "flex size-14 shrink-0 items-center justify-center rounded-2xl text-white",
                     track.colors.solid,
                   )}
                 >
                   <Icon className="size-7" strokeWidth={2} />
                 </span>
 
-                <div>
-                  <p className="font-extrabold text-foreground">{track.name}</p>
-                  <p className={cn("mt-0.5 text-sm font-semibold", track.colors.text)}>{track.specialistTitle}</p>
-                  <p className="mt-2 text-sm leading-relaxed text-muted">{track.description}</p>
+                <div className="min-w-0">
+                  <p className="break-words font-extrabold text-foreground">{track.name}</p>
+                  <p className={cn("mt-0.5 break-words text-sm font-semibold", track.colors.text)}>
+                    {track.specialistTitle}
+                  </p>
+                  <p className="line-clamp-3 mt-2 break-words text-sm leading-relaxed text-muted">
+                    {track.description}
+                  </p>
                 </div>
 
                 <span className={cn("mt-auto flex items-center gap-1 text-sm font-semibold", track.colors.text)}>

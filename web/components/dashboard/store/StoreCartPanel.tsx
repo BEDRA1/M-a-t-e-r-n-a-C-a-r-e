@@ -145,7 +145,7 @@ export function StoreCartPanel({
                 <p className="text-xs text-muted">{entry.product.category}</p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <span className="font-semibold text-foreground">
+                <span className="whitespace-nowrap font-semibold text-foreground">
                   {formatDzd(entry.product.price * entry.quantity)}
                 </span>
                 <button

@@ -35,7 +35,7 @@ export function ProductCard({
       </div>
 
       <div className="mt-2.5 flex flex-1 flex-col sm:mt-3">
-        <p className="break-words font-bold text-foreground">{product.name}</p>
+        <p className="line-clamp-2 break-words font-bold text-foreground">{product.name}</p>
         <Badge tone="neutral" className="mt-1.5 self-start">{product.category}</Badge>
         <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted">{product.description}</p>
 
@@ -48,7 +48,7 @@ export function ProductCard({
             type="button"
             onClick={onDecrement}
             disabled={quantity === 0}
-            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-black/10 text-foreground transition-colors hover:bg-primary-50 disabled:opacity-40 sm:size-11"
+            className="flex size-11 shrink-0 items-center justify-center rounded-full border border-black/10 text-foreground transition-colors hover:bg-primary-50 disabled:opacity-40"
             aria-label="إنقاص الكمية"
           >
             <Minus className="size-3.5" strokeWidth={2.5} />
@@ -58,7 +58,7 @@ export function ProductCard({
             type="button"
             onClick={onIncrement}
             disabled={isOut || atStockLimit}
-            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-500 text-white transition-colors hover:bg-primary-600 disabled:opacity-40 sm:size-11"
+            className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary-500 text-white transition-colors hover:bg-primary-600 disabled:opacity-40"
             aria-label="زيادة الكمية"
           >
             <Plus className="size-3.5" strokeWidth={2.5} />

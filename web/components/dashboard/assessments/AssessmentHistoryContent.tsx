@@ -147,7 +147,7 @@ export function AssessmentHistoryContent() {
           <div className="mt-3 flex flex-col gap-2">
             {legacyResults.map((r) => (
               <Card key={r.id} className="flex flex-wrap items-center justify-between gap-3 bg-black/[0.02] py-3">
-                <span className="text-sm text-muted">
+                <span className="min-w-0 break-words text-sm text-muted">
                   {r.domain?.nameAr} · {formatArabicDateTime(r.takenAt)}
                 </span>
                 <Badge tone="neutral">قديم</Badge>

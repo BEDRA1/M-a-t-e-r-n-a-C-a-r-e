@@ -60,7 +60,7 @@ export function CoursesListContent() {
               type="button"
               onClick={() => setTypeFilter(tab.value)}
               className={cn(
-                "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                "min-h-[44px] rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
                 typeFilter === tab.value
                   ? "bg-primary-500 text-white"
                   : "bg-primary-50 text-primary-700 hover:bg-primary-100",

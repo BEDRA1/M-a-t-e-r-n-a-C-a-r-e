@@ -61,10 +61,10 @@ export function AssessmentsListContent() {
                 <span className="flex size-12 items-center justify-center rounded-2xl bg-primary-100 text-primary-700">
                   <Icon className="size-6" strokeWidth={2} />
                 </span>
-                <div className="flex-1">
-                  <p className="font-extrabold text-foreground">{domain.nameAr}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="break-words font-extrabold text-foreground">{domain.nameAr}</p>
                   {domain.descriptionAr && (
-                    <p className="mt-1.5 text-sm leading-relaxed text-muted">{domain.descriptionAr}</p>
+                    <p className="mt-1.5 break-words text-sm leading-relaxed text-muted">{domain.descriptionAr}</p>
                   )}
                 </div>
                 <Link href={`/dashboard/assessments/${domain.id}`}>

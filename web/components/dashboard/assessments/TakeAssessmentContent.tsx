@@ -79,7 +79,7 @@ export function TakeAssessmentContent({ domainId }: { domainId: string }) {
       <div className="flex flex-col gap-4">
         {questions.map((question, index) => (
           <Card key={question.id}>
-            <p className="font-semibold text-foreground">
+            <p className="break-words font-semibold text-foreground">
               {index + 1}. {question.questionTextAr}
             </p>
             <div className="mt-3 flex flex-col gap-2">
@@ -93,7 +93,7 @@ export function TakeAssessmentContent({ domainId }: { domainId: string }) {
                     aria-checked={selected}
                     onClick={() => setAnswers((prev) => ({ ...prev, [question.id]: optionIndex }))}
                     className={cn(
-                      "flex items-center justify-between gap-3 rounded-xl border-2 px-4 py-3.5 text-start text-sm transition-[border-color,background-color,transform] active:scale-[0.99]",
+                      "flex w-full min-h-[44px] items-center justify-between gap-3 rounded-xl border-2 px-4 py-3.5 text-start text-sm transition-[border-color,background-color,transform] active:scale-[0.99]",
                       selected
                         ? "border-primary-400 bg-primary-50 text-foreground"
                         : "border-black/10 bg-surface text-foreground/80 hover:border-primary-200",

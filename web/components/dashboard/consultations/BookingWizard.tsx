@@ -107,7 +107,7 @@ function SelectableCard({
           : "border-black/10 bg-surface hover:border-primary-200",
       )}
     >
-      <span className="text-sm">{children}</span>
+      <span className="min-w-0 flex-1 break-words text-sm">{children}</span>
       <span
         className={cn(
           "flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
@@ -145,12 +145,12 @@ function SpecialistOption({
         role="radio"
         aria-checked={selected}
         onClick={onSelect}
-        className="flex flex-1 items-center justify-between gap-3 rounded-xl px-2 py-2 text-start"
+        className="flex min-w-0 flex-1 items-center justify-between gap-3 rounded-xl px-2 py-2 text-start"
       >
-        <span className="text-sm">
-          <span className="block font-semibold text-foreground">{specialist.fullName}</span>
-          <span className="block text-xs text-muted">{specialist.specialty}</span>
-          <span className="block text-xs text-muted">
+        <span className="min-w-0 flex-1 text-sm">
+          <span className="line-clamp-1 break-words font-semibold text-foreground">{specialist.fullName}</span>
+          <span className="line-clamp-1 break-words text-xs text-muted">{specialist.specialty}</span>
+          <span className="line-clamp-1 break-words text-xs text-muted">
             {specialist.yearsExperience} سنوات خبرة{specialist.user?.wilaya ? ` · ${specialist.user.wilaya}` : ""}
           </span>
         </span>
@@ -519,12 +519,12 @@ export function BookingWizard() {
             <h2 className="text-sm font-bold text-foreground">راجعي تفاصيل الحجز</h2>
             {submitError && <Alert tone="error">{submitError}</Alert>}
             <dl className="flex flex-col divide-y divide-black/5 rounded-xl border border-black/5">
-              <div className="flex items-center justify-between px-4 py-3 text-sm">
-                <dt className="flex items-center gap-1.5 text-muted">
+              <div className="flex items-center justify-between gap-2 px-4 py-3 text-sm">
+                <dt className="flex shrink-0 items-center gap-1.5 text-muted">
                   <UsersIcon className="size-4" strokeWidth={2} />
                   الأخصائي
                 </dt>
-                <dd className="font-semibold text-foreground">
+                <dd className="min-w-0 break-words text-end font-semibold text-foreground">
                   {specialist.data?.fullName ?? "—"}
                 </dd>
               </div>
@@ -548,9 +548,9 @@ export function BookingWizard() {
                   {selectedSlot ? formatArabicDateTime(selectedSlot.startTime) : "—"}
                 </dd>
               </div>
-              <div className="flex items-center justify-between px-4 py-3 text-sm">
-                <dt className="text-muted">سبب الحجز</dt>
-                <dd className="font-semibold text-foreground">
+              <div className="flex items-center justify-between gap-2 px-4 py-3 text-sm">
+                <dt className="shrink-0 text-muted">سبب الحجز</dt>
+                <dd className="min-w-0 break-words text-end font-semibold text-foreground">
                   {selectedReason?.reasonText ?? "—"}
                 </dd>
               </div>
@@ -604,12 +604,12 @@ export function BookingWizard() {
                   className="size-full"
                 />
               </span>
-              <div className="min-w-0">
-                <p className="font-bold text-foreground">{bioSpecialist.fullName}</p>
-                <p className="text-sm text-muted">{bioSpecialist.specialty}</p>
+              <div className="min-w-0 flex-1">
+                <p className="line-clamp-1 break-words font-bold text-foreground">{bioSpecialist.fullName}</p>
+                <p className="line-clamp-1 break-words text-sm text-muted">{bioSpecialist.specialty}</p>
               </div>
             </div>
-            <p className="text-sm leading-relaxed text-muted">{bioSpecialist.bio}</p>
+            <p className="break-words text-sm leading-relaxed text-muted">{bioSpecialist.bio}</p>
             <Button
               onClick={() => {
                 setSpecialistId(bioSpecialist.id);

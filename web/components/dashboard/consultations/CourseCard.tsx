@@ -85,7 +85,7 @@ export function CourseCard({ course }: { course: Course }) {
 
   return (
     <Card className="flex flex-col overflow-hidden !p-0">
-      <div className="relative aspect-[4/3] w-full sm:aspect-video">
+      <div className="relative aspect-video w-full">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={courseCoverImage(track)}
@@ -104,15 +104,17 @@ export function CourseCard({ course }: { course: Course }) {
       </div>
 
       <div className="flex flex-1 flex-col p-4">
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-wrap items-start justify-between gap-2">
           <Badge tone="neutral">{consultationTypeLabel(course.type)}</Badge>
           {seatsStatus && <Badge tone={seatsStatusBadgeTone(seatsStatus)}>{seatsStatusLabel(seatsStatus)}</Badge>}
         </div>
 
         <Link href={`/dashboard/consultations/courses/${course.id}`} className="mt-3">
-          <p className="font-bold text-foreground hover:text-primary-700">{course.title}</p>
+          <p className="line-clamp-2 break-words font-bold text-foreground hover:text-primary-700">{course.title}</p>
         </Link>
-        {course.specialist && <p className="mt-0.5 text-sm text-muted">{course.specialist.fullName}</p>}
+        {course.specialist && (
+          <p className="line-clamp-1 break-words text-sm text-muted">{course.specialist.fullName}</p>
+        )}
 
         <div className="mt-3 flex flex-col gap-1.5 text-sm text-muted">
           <span className="flex items-center gap-1.5">
@@ -202,10 +204,11 @@ export function CourseCard({ course }: { course: Course }) {
                 <p className="text-xs font-semibold text-primary-700">سيُخصَم رصيد دورة من اشتراكك — بلا دفع</p>
               </div>
             )}
-            <div className="mt-4 flex items-center justify-between gap-3">
-              <span className="font-bold text-foreground">{formatDzd(course.price)}</span>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <span className="whitespace-nowrap font-bold text-foreground">{formatDzd(course.price)}</span>
               <Button
                 size="sm"
+                className="w-full sm:w-auto"
                 disabled={isFull}
                 loading={enroll.isPending && enroll.variables === course.id}
                 onClick={startEnroll}

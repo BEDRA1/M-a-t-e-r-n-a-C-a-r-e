@@ -124,7 +124,7 @@ export function ThousandDaysJourneyBar() {
                   <StageIcon className="size-11" />
                   <span
                     className={cn(
-                      "text-center text-[11px] font-semibold leading-tight",
+                      "line-clamp-2 max-w-full break-words text-center text-[11px] font-semibold leading-tight",
                       isCurrent ? "text-primary-600" : "text-gray-500",
                     )}
                   >
@@ -202,7 +202,7 @@ export function ThousandDaysJourneyBar() {
           )}
 
           {currentStage && !isComplete && (
-            <div className="rounded-full bg-primary-50 px-4 py-2 text-center text-xs font-bold text-primary-700">
+            <div className="break-words rounded-2xl bg-primary-50 px-4 py-2 text-center text-xs font-bold leading-relaxed text-primary-700">
               رحلة الـ 1000 يوم الأولى | {currentStage.label} (اليوم {displayDay} من 1000)
             </div>
           )}
