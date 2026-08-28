@@ -27,8 +27,8 @@ export function PlanCard({
     <div
       className={
         highlight
-          ? "relative flex flex-col overflow-hidden rounded-[var(--radius-card)] border-2 border-primary-500 bg-surface p-6 shadow-[var(--shadow-soft)]"
-          : "relative flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-black/5 bg-surface p-6 shadow-[var(--shadow-soft)]"
+          ? "relative flex h-full w-full max-w-full flex-col overflow-hidden rounded-[var(--radius-card)] border-2 border-primary-500 bg-surface p-6 shadow-[var(--shadow-soft)]"
+          : "relative flex h-full w-full max-w-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-black/5 bg-surface p-6 shadow-[var(--shadow-soft)]"
       }
     >
       {highlight && (
@@ -77,7 +77,7 @@ export function PlanCard({
       </ul>
 
       {onSubscribe && (
-        <Button className="mt-5 w-full justify-center" variant={highlight ? "primary" : "outline"} onClick={onSubscribe}>
+        <Button className="mt-auto w-full justify-center" variant={highlight ? "primary" : "outline"} onClick={onSubscribe}>
           اشتركي الآن
         </Button>
       )}

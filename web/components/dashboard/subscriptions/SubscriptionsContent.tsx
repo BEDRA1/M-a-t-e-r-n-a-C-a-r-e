@@ -5,7 +5,6 @@ import { Crown } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Alert } from "@/components/ui/Alert";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { cn } from "@/lib/cn";
 import { ApiError } from "@/lib/api-client";
 import { useMySubscriptions, useSubscriptionPlans } from "@/lib/hooks/useSubscriptions";
 import type { SubscriptionPlan } from "@/lib/types";
@@ -15,6 +14,50 @@ import { MothersSupportSection } from "./MothersSupportSection";
 import { PlanCard } from "./PlanCard";
 import { PaymentOverlay } from "./PaymentOverlay";
 import { CurrentSubscriptionCard } from "./CurrentSubscriptionCard";
+
+// ترتيب عرض منطقي (الصف الأول: الرقمية/المميزة/الملكية، الصف الثاني: النفاس/الزوجين) بدل
+// ترتيب الـAPI الفعلي (بالسعر تصاعديًا) الذي يخلط الباقات لمرة واحدة بين باقات الاشتراك الشهري
+const PLAN_DISPLAY_ORDER = ["basic", "premium", "royal", "postpartum", "couples"];
+
+function sortPlansForDisplay(plans: SubscriptionPlan[]): SubscriptionPlan[] {
+  return [...plans].sort((a, b) => {
+    const ai = PLAN_DISPLAY_ORDER.indexOf(a.code);
+    const bi = PLAN_DISPLAY_ORDER.indexOf(b.code);
+    return (ai === -1 ? PLAN_DISPLAY_ORDER.length : ai) - (bi === -1 ? PLAN_DISPLAY_ORDER.length : bi);
+  });
+}
+
+/** شبكة الباقات: الصف الأول 3 أعمدة متساوية الارتفاع، والباقي صفًا ثانيًا بعمودين — على
+ * الموبايل عمود واحد دائمًا. h-full على PlanCard + items-stretch الافتراضي في grid يضمن تساوي
+ * ارتفاع كل بطاقات نفس الصف بغض النظر عن طول قائمة مميزاتها */
+function PlansGrid({
+  plans,
+  onSubscribe,
+}: {
+  plans: SubscriptionPlan[];
+  onSubscribe?: (plan: SubscriptionPlan) => void;
+}) {
+  const ordered = sortPlansForDisplay(plans);
+  const firstRow = ordered.slice(0, 3);
+  const secondRow = ordered.slice(3);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {firstRow.map((plan) => (
+          <PlanCard key={plan.id} plan={plan} onSubscribe={onSubscribe ? () => onSubscribe(plan) : undefined} />
+        ))}
+      </div>
+      {secondRow.length > 0 && (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {secondRow.map((plan) => (
+            <PlanCard key={plan.id} plan={plan} onSubscribe={onSubscribe ? () => onSubscribe(plan) : undefined} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function SubscriptionsContent() {
   const plans = useSubscriptionPlans();
@@ -49,7 +92,7 @@ export function SubscriptionsContent() {
       </div>
 
       {plans.isLoading || mySubscriptions.isLoading ? (
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
           <Skeleton className="h-80 w-full" />
           <Skeleton className="h-80 w-full" />
           <Skeleton className="h-80 w-full" />
@@ -66,39 +109,14 @@ export function SubscriptionsContent() {
 
           <div className="mt-10">
             <h2 className="text-lg font-bold text-foreground sm:text-xl">باقات أخرى للمقارنة</h2>
-            <div
-              className={cn(
-                "mt-5 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1",
-                "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-                "sm:grid sm:grid-cols-2 sm:overflow-visible sm:snap-none sm:pb-0 xl:grid-cols-3",
-              )}
-            >
-              {plans.data
-                .filter((plan) => plan.id !== activeSubscription.planId)
-                .map((plan) => (
-                  <div
-                    key={plan.id}
-                    className="min-w-[78%] shrink-0 snap-start sm:min-w-0 sm:shrink sm:snap-align-none"
-                  >
-                    <PlanCard plan={plan} />
-                  </div>
-                ))}
+            <div className="mt-5">
+              <PlansGrid plans={plans.data.filter((plan) => plan.id !== activeSubscription.planId)} />
             </div>
           </div>
         </div>
       ) : (
-        <div
-          className={cn(
-            "mt-8 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1",
-            "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-            "sm:grid sm:grid-cols-2 sm:overflow-visible sm:snap-none sm:pb-0 xl:grid-cols-3",
-          )}
-        >
-          {plans.data.map((plan) => (
-            <div key={plan.id} className="min-w-[78%] shrink-0 snap-start sm:min-w-0 sm:shrink sm:snap-align-none">
-              <PlanCard plan={plan} onSubscribe={() => setSelectedPlan(plan)} />
-            </div>
-          ))}
+        <div className="mt-8">
+          <PlansGrid plans={plans.data} onSubscribe={(plan) => setSelectedPlan(plan)} />
         </div>
       )}
 
