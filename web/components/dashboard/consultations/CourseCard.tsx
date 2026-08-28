@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Calendar, CheckCircle, MapPin, Users, Video } from "lucide-react";
+import { Calendar, CheckCircle, MapPin, Sparkles, Users, Video } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { PaymentMethodSelector } from "@/components/shared/PaymentMethodSelector";
 import { cn } from "@/lib/cn";
 import {
   consultationTypeLabel,
@@ -15,12 +17,17 @@ import {
   seatsStatusLabel,
 } from "@/lib/format";
 import { useEnrollCourse, useMyCourseEnrollments } from "@/lib/hooks/useCourses";
+import { useMySubscriptions } from "@/lib/hooks/useSubscriptions";
+import { useSimulatedPayment, type BaridimobPaymentData, type CardPaymentData, type PaymentMethodKind } from "@/lib/hooks/useSimulatedPayment";
 import { ApiError } from "@/lib/api-client";
 import { courseCoverImage, TRACKS } from "@/lib/tracks";
 import type { Course } from "@/lib/types";
 
 export function CourseCard({ course }: { course: Course }) {
   const enroll = useEnrollCourse();
+  const mySubscriptions = useMySubscriptions();
+  const simulatedPayment = useSimulatedPayment();
+  const [showPayment, setShowPayment] = useState(false);
   // السبب الجذري الحقيقي لشكوى "مسجّلة بالفعل ولم أسجل": الضغط الأول كان ينجح فعليًا (201)
   // لكن الزر لا يتغيّر إطلاقًا بعده — فيبدو للمستخدمة أن شيئًا لم يحدث، وضغطة ثانية طبيعية
   // تصطدم بـ409 الصحيح فعليًا لكنه يبدو خطأً كاذبًا بلا سياق. هذا التحقق من enrollments/mine
@@ -29,6 +36,11 @@ export function CourseCard({ course }: { course: Course }) {
   const alreadyEnrolled =
     (enroll.isSuccess && enroll.variables === course.id) ||
     Boolean(myEnrollments.data?.some((e) => e.courseId === course.id));
+  // دورة برصيد اشتراك نشط تُسجَّل مباشرة بلا دفع — نفس قاعدة صفحة تفاصيل الدورة تمامًا،
+  // لا تكرارًا عشوائيًا للمنطق
+  const hasCourseCredit = Boolean(
+    mySubscriptions.data?.some((s) => s.status === "active" && s.courseCreditsRemaining > 0),
+  );
   const seatsStatus =
     course.type === "in_person" && course.capacity !== null
       ? getSeatsStatus(course.capacity, course.enrolledCount)
@@ -36,6 +48,19 @@ export function CourseCard({ course }: { course: Course }) {
   const isFull = seatsStatus === "full";
   const track = course.specialist?.track;
   const trackColors = TRACKS[track ?? "psychological"].colors;
+
+  const handlePaymentSubmit = async (kind: PaymentMethodKind, paymentData: CardPaymentData | BaridimobPaymentData) => {
+    const approved = await simulatedPayment.submit(kind, paymentData);
+    if (approved) enroll.mutate(course.id);
+  };
+
+  const startEnroll = () => {
+    if (hasCourseCredit) {
+      enroll.mutate(course.id);
+    } else {
+      setShowPayment(true);
+    }
+  };
 
   return (
     <Card className="flex flex-col overflow-hidden !p-0">
@@ -96,24 +121,47 @@ export function CourseCard({ course }: { course: Course }) {
           )}
         </div>
 
-        <div className="mt-4 flex items-center justify-between gap-3">
-          <span className="font-bold text-foreground">{formatDzd(course.price)}</span>
-          {alreadyEnrolled ? (
+        {alreadyEnrolled ? (
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <span className="font-bold text-foreground">{formatDzd(course.price)}</span>
             <span className="flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-sm font-bold text-emerald-700">
               <CheckCircle className="size-4" strokeWidth={2} />
               مسجّلة
             </span>
-          ) : (
-            <Button
-              size="sm"
-              disabled={isFull}
-              loading={enroll.isPending && enroll.variables === course.id}
-              onClick={() => enroll.mutate(course.id)}
-            >
-              {isFull ? "اكتملت السعة" : "سجّلي الآن"}
+          </div>
+        ) : showPayment ? (
+          <div className="mt-4 flex flex-col gap-2">
+            <PaymentMethodSelector
+              amount={course.price}
+              submitting={simulatedPayment.isPending || enroll.isPending}
+              errorMessage={simulatedPayment.error}
+              onSubmit={handlePaymentSubmit}
+            />
+            <Button type="button" variant="ghost" size="sm" onClick={() => setShowPayment(false)} className="self-start">
+              رجوع
             </Button>
-          )}
-        </div>
+          </div>
+        ) : (
+          <>
+            {hasCourseCredit && (
+              <div className="mt-3 flex items-start gap-2 rounded-xl bg-primary-50 px-3 py-2">
+                <Sparkles className="mt-0.5 size-3.5 shrink-0 text-primary-600" strokeWidth={2} />
+                <p className="text-xs font-semibold text-primary-700">سيُخصَم رصيد دورة من اشتراكك — بلا دفع</p>
+              </div>
+            )}
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <span className="font-bold text-foreground">{formatDzd(course.price)}</span>
+              <Button
+                size="sm"
+                disabled={isFull}
+                loading={enroll.isPending && enroll.variables === course.id}
+                onClick={startEnroll}
+              >
+                {isFull ? "اكتملت السعة" : "سجّلي الآن"}
+              </Button>
+            </div>
+          </>
+        )}
 
         {enroll.isError && enroll.variables === course.id && !alreadyEnrolled && (
           <p className="mt-2 text-xs text-red-600">
