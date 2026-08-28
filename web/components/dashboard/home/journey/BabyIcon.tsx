@@ -1,14 +1,17 @@
-/** أيقونة "السنة الأولى" — دائرة رمادية فاتحة + وجه طفل صغير، لشريط رحلة الـ1000 يوم */
+/** أيقونة "السنة الأولى" — دائرة رمادية فاتحة + وجه طفل صغير مرسوم بأشكال مليئة (لا مخطط
+ * رفيع)، بخدّين ورديين وخصلة شعر، ليطابق أسلوب الرسم المليء المستخدَم في بقية أيقونات الشريط */
 export function BabyIcon({ className }: { className?: string }) {
   return (
     <div className={className} role="img" aria-label="السنة الأولى">
-      <svg viewBox="0 0 40 40" className="size-full">
-        <circle cx="20" cy="20" r="20" fill="#F3F4F6" />
-        <circle cx="20" cy="21" r="10" fill="none" stroke="#9CA3AF" strokeWidth="2.2" />
-        <circle cx="16.2" cy="19" r="1.6" fill="#9CA3AF" />
-        <circle cx="23.8" cy="19" r="1.6" fill="#9CA3AF" />
-        <path d="M16 25c1.5 1.5 6.5 1.5 8 0" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" />
-        <path d="M20 11c-2.2 0-3.2 1.6-3 3.2" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" />
+      <svg viewBox="0 0 120 140" className="size-full">
+        <circle cx="60" cy="80" r="52" fill="#F3F4F6" />
+        <path d="M60 42c-17 0-28 13-28 32s12 34 28 34 28-15 28-34-11-32-28-32Z" fill="#D1D5DB" />
+        <path d="M60 42c-5-9 0-16 9-18" fill="none" stroke="#D1D5DB" strokeWidth="6" strokeLinecap="round" />
+        <circle cx="47" cy="76" r="8" fill="#F9A8C9" opacity="0.55" />
+        <circle cx="73" cy="76" r="8" fill="#F9A8C9" opacity="0.55" />
+        <circle cx="49" cy="70" r="5" fill="#6B7280" />
+        <circle cx="71" cy="70" r="5" fill="#6B7280" />
+        <path d="M49 88c5 5 17 5 22 0" fill="none" stroke="#6B7280" strokeWidth="4.5" strokeLinecap="round" />
       </svg>
     </div>
   );
