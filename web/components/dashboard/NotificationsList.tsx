@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Bell, CheckCircle2 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
+  useMarkStaticNotificationsSeen,
   useNotifications,
 } from "@/lib/hooks/useNotifications";
 import { formatArabicDateTime, notificationTypeLabel } from "@/lib/format";
@@ -18,6 +20,13 @@ export function NotificationsList() {
   const notifications = useNotifications();
   const markAsRead = useMarkNotificationRead();
   const markAllAsRead = useMarkAllNotificationsRead();
+  const markStaticSeen = useMarkStaticNotificationsSeen();
+
+  // زيارة صفحة الإشعارات تُعلّم الإشعارات الست الثابتة كـ"مقروءة" فورًا (تُحدَّث شارة الجرس
+  // في الهيدر/الشريط السفلي مباشرة عبر queryClient، لا تنتظر إعادة تحميل الصفحة)
+  useEffect(() => {
+    markStaticSeen();
+  }, [markStaticSeen]);
 
   const unreadCount = notifications.data?.filter((n) => !n.isRead).length ?? 0;
 

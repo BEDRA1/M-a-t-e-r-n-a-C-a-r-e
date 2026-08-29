@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/Button";
 import { BrandMark } from "@/components/ui/BrandMark";
 import { BrandName } from "@/components/ui/BrandName";
 import { useLogout } from "@/lib/hooks/useAuth";
-import { useNotifications } from "@/lib/hooks/useNotifications";
+import { useUnreadNotificationsCount } from "@/lib/hooks/useNotifications";
 import { getDashboardNavItems, isNavPathActive, type DashboardNavChild } from "./nav-links";
+import { NotificationBadge } from "./NotificationBadge";
 import type { User } from "@/lib/types";
 
 // تبسيط القائمة إلى روابط مباشرة فقط للشريط الأفقي (لا معنى لعنصر أب قابل للطي هنا)
@@ -29,8 +30,7 @@ export function DashboardNav({ user }: { user: User }) {
   const router = useRouter();
   const logout = useLogout();
   const flatTabs = buildFlatTabs(user.role);
-  const notifications = useNotifications();
-  const unreadCount = notifications.data?.filter((n) => !n.isRead).length ?? 0;
+  const unreadCount = useUnreadNotificationsCount();
 
   const segments = pathname.split("/").filter(Boolean);
   const isNestedPage = segments.length > 2;
@@ -73,9 +73,7 @@ export function DashboardNav({ user }: { user: User }) {
           aria-label="الإشعارات"
         >
           <Bell className="size-5" strokeWidth={2} />
-          {unreadCount > 0 && (
-            <span className="absolute end-2.5 top-2.5 flex size-2.5 rounded-full bg-primary-500" />
-          )}
+          <NotificationBadge count={unreadCount} />
         </Link>
       </div>
 

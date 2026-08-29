@@ -4,13 +4,13 @@ import Link from "next/link";
 import { Bell, Heart, User } from "lucide-react";
 import { BrandMark } from "@/components/ui/BrandMark";
 import { BrandName } from "@/components/ui/BrandName";
-import { useNotifications } from "@/lib/hooks/useNotifications";
+import { useUnreadNotificationsCount } from "@/lib/hooks/useNotifications";
+import { NotificationBadge } from "@/components/dashboard/NotificationBadge";
 
 /** هيدر مخصّص للصفحة الرئيسية على الهاتف فقط — DashboardNav العام يُخفي صفّه المكافئ
  * هناك تحديدًا (pathname === "/dashboard") لتفادي هيدرين متراكبين */
 export function MobileHomeHeader() {
-  const notifications = useNotifications();
-  const unreadCount = notifications.data?.filter((n) => !n.isRead).length ?? 0;
+  const unreadCount = useUnreadNotificationsCount();
 
   return (
     <div className="flex h-16 items-center justify-between bg-white px-4">
@@ -21,11 +21,7 @@ export function MobileHomeHeader() {
           aria-label="الإشعارات"
         >
           <Bell className="size-6 text-foreground/70" strokeWidth={2} />
-          {unreadCount > 0 && (
-            <span className="absolute -end-1.5 -top-1.5 flex min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-[16px] text-white">
-              {unreadCount}
-            </span>
-          )}
+          <NotificationBadge count={unreadCount} />
         </Link>
         <Heart className="size-4 fill-primary-500 text-primary-500" strokeWidth={0} />
       </div>
