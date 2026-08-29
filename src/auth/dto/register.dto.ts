@@ -3,8 +3,8 @@ import {
   IsDateString,
   IsEmail,
   IsIn,
+  IsNotEmpty,
   IsOptional,
-  Matches,
   IsString,
   MinLength,
 } from 'class-validator';
@@ -17,8 +17,9 @@ const REGISTERABLE_ROLES = [UserRole.mother, UserRole.spouse, UserRole.specialis
 export type RegisterableRole = (typeof REGISTERABLE_ROLES)[number];
 
 export class RegisterDto {
-  @ApiProperty({ example: '0555123456', description: 'رقم الهاتف الجزائري' })
-  @Matches(/^(\+213|0)(5|6|7)[0-9]{8}$/, { message: 'رقم الهاتف غير صالح' })
+  @ApiProperty({ example: '0555123456', description: 'رقم الهاتف' })
+  @IsString()
+  @IsNotEmpty({ message: 'رقم الهاتف مطلوب' })
   phone: string;
 
   @ApiPropertyOptional({ example: 'user@example.com' })
