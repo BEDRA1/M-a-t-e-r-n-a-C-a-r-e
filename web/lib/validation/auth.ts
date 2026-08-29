@@ -1,16 +1,14 @@
 import { z } from "zod";
 
-const phoneRegex = /^(\+213|0)(5|6|7)[0-9]{8}$/;
-
 export const loginSchema = z.object({
-  phone: z.string().min(1, "رقم الهاتف مطلوب").regex(phoneRegex, "رقم الهاتف غير صالح"),
+  phone: z.string().min(1, "رقم الهاتف مطلوب"),
   password: z.string().min(8, "كلمة المرور يجب أن تكون 8 أحرف على الأقل"),
 });
 
 export type LoginFormValues = z.infer<typeof loginSchema>;
 
 export const registerSchema = z.object({
-  phone: z.string().min(1, "رقم الهاتف مطلوب").regex(phoneRegex, "رقم الهاتف غير صالح"),
+  phone: z.string().min(1, "رقم الهاتف مطلوب"),
   password: z.string().min(8, "كلمة المرور يجب أن تكون 8 أحرف على الأقل"),
   role: z.enum(["mother", "spouse"], { message: "يرجى اختيار الدور" }),
   wilaya: z.string().optional(),
