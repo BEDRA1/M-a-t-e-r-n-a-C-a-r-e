@@ -53,7 +53,7 @@ export const TRACKS: Record<TrackCode, TrackConfig> = {
       "شهادة مشاركة في نهاية الدورة",
       "مواد تعليمية ودعم مستمر",
     ],
-    courseCoverImage: "https://images.unsplash.com/photo-1655337690436-98778f38d613?w=400&q=80&auto=format&fit=crop",
+    courseCoverImage: "https://images.unsplash.com/photo-1655337690307-5293f900f580?w=400&q=80&auto=format&fit=crop",
   },
   health: {
     code: "health",
@@ -78,7 +78,7 @@ export const TRACKS: Record<TrackCode, TrackConfig> = {
       "الاستعداد للولادة والعناية بالأم",
       "التوعية بالرضاعة والعناية بالطفل",
     ],
-    courseCoverImage: "https://images.unsplash.com/photo-1770403490295-c2475cdf8143?w=400&q=80&auto=format&fit=crop",
+    courseCoverImage: "https://images.unsplash.com/photo-1755718669459-a8691dd613de?w=400&q=80&auto=format&fit=crop",
   },
   nutrition: {
     code: "nutrition",
