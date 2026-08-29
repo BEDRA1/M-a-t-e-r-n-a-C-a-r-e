@@ -39,8 +39,11 @@ export function ServiceCatalogGrid() {
   }
 
   // "تنظيف عميق" مخفية من العرض فقط بطلب صريح (لا تُحذف من قاعدة البيانات) — الخدمة تبقى
-  // موجودة فعليًا في الـBackend، فقط لا تظهر في هذه القائمة
-  const visibleServices = services.data.filter((service) => service.name !== "تنظيف عميق");
+  // موجودة فعليًا في الـBackend، فقط لا تظهر في هذه القائمة. "طبخ منزلي" (الأكل الصحي) لها
+  // قسمها المخصَّص الكامل (HealthyMealsSection: قائمة وجبات حقيقية + سلة) بدل بطاقة عامة هنا
+  const visibleServices = services.data.filter(
+    (service) => service.name !== "تنظيف عميق" && service.name !== "طبخ منزلي",
+  );
 
   if (visibleServices.length === 0) {
     return (

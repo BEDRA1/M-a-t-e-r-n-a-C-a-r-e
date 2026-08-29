@@ -5,6 +5,7 @@ import { ListChecks, CalendarCheck, ShieldCheck, CreditCard } from "lucide-react
 import { Badge } from "@/components/ui/Badge";
 import { HomeServicesIllustration } from "@/components/dashboard/illustrations/HomeServicesIllustration";
 import { ServiceCatalogGrid } from "./ServiceCatalogGrid";
+import { HealthyMealsSection } from "./HealthyMealsSection";
 import { MyServiceBookingsSection } from "./MyServiceBookingsSection";
 
 const steps: { icon: LucideIcon; title: string; text: string }[] = [
@@ -96,6 +97,8 @@ export function HomeServicesContent() {
           <ServiceCatalogGrid />
         </div>
       </section>
+
+      <HealthyMealsSection />
 
       <MyServiceBookingsSection />
     </div>

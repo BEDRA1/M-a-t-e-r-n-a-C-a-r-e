@@ -53,7 +53,7 @@ export const TRACKS: Record<TrackCode, TrackConfig> = {
       "شهادة مشاركة في نهاية الدورة",
       "مواد تعليمية ودعم مستمر",
     ],
-    courseCoverImage: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&q=80&auto=format&fit=crop",
+    courseCoverImage: "https://images.unsplash.com/photo-1655337690436-98778f38d613?w=400&q=80&auto=format&fit=crop",
   },
   health: {
     code: "health",
@@ -78,7 +78,7 @@ export const TRACKS: Record<TrackCode, TrackConfig> = {
       "الاستعداد للولادة والعناية بالأم",
       "التوعية بالرضاعة والعناية بالطفل",
     ],
-    courseCoverImage: "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=400&q=80&auto=format&fit=crop",
+    courseCoverImage: "https://images.unsplash.com/photo-1770403490295-c2475cdf8143?w=400&q=80&auto=format&fit=crop",
   },
   nutrition: {
     code: "nutrition",
@@ -104,7 +104,7 @@ export const TRACKS: Record<TrackCode, TrackConfig> = {
       "التغذية في فترة الرضاعة",
       "نصائح عملية وتطبيقية",
     ],
-    courseCoverImage: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80&auto=format&fit=crop",
+    courseCoverImage: "https://images.unsplash.com/photo-1683105555403-4c4cae4e2298?w=400&q=80&auto=format&fit=crop",
   },
 };
 

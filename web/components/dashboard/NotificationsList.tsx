@@ -12,6 +12,7 @@ import {
 } from "@/lib/hooks/useNotifications";
 import { formatArabicDateTime, notificationTypeLabel } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { StaticNotifications } from "./StaticNotifications";
 
 export function NotificationsList() {
   const notifications = useNotifications();
@@ -35,6 +36,8 @@ export function NotificationsList() {
           </Button>
         )}
       </div>
+
+      <StaticNotifications />
 
       {notifications.isLoading ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

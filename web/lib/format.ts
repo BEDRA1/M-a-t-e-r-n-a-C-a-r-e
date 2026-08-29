@@ -214,16 +214,6 @@ export function homeServiceDisplayName(name: string): string {
   return HOME_SERVICE_NAME_OVERRIDES[name] ?? name;
 }
 
-// أمثلة قائمة/ميني مصغّرة تُعرض على بطاقة "الأكل الصحي" تحديدًا — نص عرض من طرف الواجهة فقط،
-// لا يُخزَّن في وصف الخدمة بقاعدة البيانات
-const HOME_SERVICE_MENU_HIGHLIGHTS: Record<string, string[]> = {
-  "طبخ منزلي": ["سلطات طازجة", "أطباق متوازنة", "وجبات خفيفة صحية", "خيارات نباتية"],
-};
-
-export function homeServiceMenuHighlights(name: string): string[] | null {
-  return HOME_SERVICE_MENU_HIGHLIGHTS[name] ?? null;
-}
-
 const DAY_OF_WEEK_LABELS: Record<number, string> = {
   0: "الأحد",
   1: "الإثنين",
