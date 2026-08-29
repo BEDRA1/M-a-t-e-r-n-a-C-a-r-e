@@ -271,7 +271,7 @@ function TrackDetailInner({ track: trackCode }: { track: TrackCode }) {
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-lg font-bold text-foreground">
             <Users className="size-5 text-muted" strokeWidth={2} />
-            {track.specialistTitle}ات هذا المسار
+            {track.specialistTitlePlural} هذا المسار
           </h2>
           <Link
             href={`/dashboard/consultations/specialists?track=${track.code}`}
