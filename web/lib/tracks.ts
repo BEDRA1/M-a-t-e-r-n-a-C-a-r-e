@@ -78,7 +78,7 @@ export const TRACKS: Record<TrackCode, TrackConfig> = {
       "الاستعداد للولادة والعناية بالأم",
       "التوعية بالرضاعة والعناية بالطفل",
     ],
-    courseCoverImage: "https://images.unsplash.com/photo-1755718669459-a8691dd613de?w=400&q=80&auto=format&fit=crop",
+    courseCoverImage: "https://images.unsplash.com/photo-1691139600923-8fba078704b0?w=400&q=80&auto=format&fit=crop",
   },
   nutrition: {
     code: "nutrition",
