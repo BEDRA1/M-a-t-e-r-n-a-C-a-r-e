@@ -26,8 +26,8 @@ export interface TrackConfig {
   colors: TrackColorClasses;
   consultationIncludes: string[];
   courseFeatures: string[];
-  /** صورة غلاف موضوعية لدورات هذا المسار — رابط images.unsplash.com حقيقي تحقّقتُ منه بـcurl
-   * مباشرةً (source.unsplash.com المطلوب أصلًا خدمة متوقفة نهائيًا من Unsplash، ترجع 503) */
+  /** صورة غلاف حقيقية بعلامة Materna Care التجارية من public/الدورات/ (وُفّرت مباشرة، صورة
+   * واحدة لكل مسار تُستخدَم لكل دوراته) — لم تعد روابط Unsplash خارجية مؤقتة */
   courseCoverImage: string;
 }
 
@@ -57,7 +57,7 @@ export const TRACKS: Record<TrackCode, TrackConfig> = {
       "شهادة مشاركة في نهاية الدورة",
       "مواد تعليمية ودعم مستمر",
     ],
-    courseCoverImage: "https://images.unsplash.com/photo-1655337690307-5293f900f580?w=400&q=80&auto=format&fit=crop",
+    courseCoverImage: "/الدورات/المرافقة النفسية.jpg",
   },
   health: {
     code: "health",
@@ -83,7 +83,7 @@ export const TRACKS: Record<TrackCode, TrackConfig> = {
       "الاستعداد للولادة والعناية بالأم",
       "التوعية بالرضاعة والعناية بالطفل",
     ],
-    courseCoverImage: "https://images.unsplash.com/photo-1691139600923-8fba078704b0?w=400&q=80&auto=format&fit=crop",
+    courseCoverImage: "/الدورات/المرافقة الصحية.jpg",
   },
   nutrition: {
     code: "nutrition",
@@ -110,7 +110,7 @@ export const TRACKS: Record<TrackCode, TrackConfig> = {
       "التغذية في فترة الرضاعة",
       "نصائح عملية وتطبيقية",
     ],
-    courseCoverImage: "https://images.unsplash.com/photo-1683105555403-4c4cae4e2298?w=400&q=80&auto=format&fit=crop",
+    courseCoverImage: "/الدورات/المرافقة الغذائية.jpg",
   },
 };
 
