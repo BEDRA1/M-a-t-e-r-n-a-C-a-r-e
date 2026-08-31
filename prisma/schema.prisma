@@ -47,9 +47,11 @@ enum AssessmentDomainName {
   stress
   pressure
   sleep
-  // المقياسان المعياريان الفعليان من الآن فصاعداً
+  // المقاييس المعيارية الفعلية من الآن فصاعداً
   gad7
   epds
+  // مقياس ما بعد الصدمة التالي للولادة — من تأليف فاضل آية وبن الشارف فلة (2026)
+  ptsd
 }
 
 enum AssessmentClassification {
@@ -65,6 +67,9 @@ enum AssessmentClassification {
   // تصنيف EPDS الرسمي: يُعاد استخدام low وhigh أعلاه لأنهما يطابقان معناهما تمامًا
   // (0-9 منخفض، 13-30 مرتفع)، ويُضاف هنا فقط المستوى الأوسط الخاص بـEPDS
   needs_followup
+  // تصنيف مقياس الصدمة التالية للولادة: يُعاد استخدام low/medium/high أعلاه للمستويات
+  // الثلاثة الأولى (0-28 / 29-56 / 57-84)، ويُضاف هنا فقط المستوى الرابع (85-112)
+  very_high
 }
 
 enum NotificationType {
@@ -332,6 +337,9 @@ model AssessmentResult {
 enum UrgentHelpTriggerSource {
   epds_critical_item
   manual_button
+  // عتبة الدرجة الكلية (لا بند حرج فردي) — مقياس الصدمة التالية للولادة حين تتجاوز
+  // الدرجة الكلية 85 من 112
+  assessment_score_threshold
 }
 
 enum UrgentHelpStatus {

@@ -22,5 +22,20 @@ export function classifyEpds(totalScore: number): AssessmentClassification {
   return AssessmentClassification.high;
 }
 
+/**
+ * تصنيف مقياس ما بعد الصدمة التالية للولادة (فاضل آية وبن الشارف فلة، 2026) —
+ * 28 بندًا على مقياس 5 نقاط (0-4)، المجموع بين 0 و112.
+ * ملاحظة: بروتوكول السلامة هنا مبني على عتبة المجموع الكلي (>85) لا بند حرج فردي
+ * كما في EPDS — يُحسب في AssessmentsService.submit لا هنا.
+ */
+export function classifyPtsd(totalScore: number): AssessmentClassification {
+  if (totalScore <= 28) return AssessmentClassification.low;
+  if (totalScore <= 56) return AssessmentClassification.medium;
+  if (totalScore <= 84) return AssessmentClassification.high;
+  return AssessmentClassification.very_high;
+}
+
+export const PTSD_SAFETY_THRESHOLD = 85;
+
 export const ASSESSMENT_DISCLAIMER_AR =
   'هذه المقاييس تُستخدم للفحص والتقييم النفسي الأولي فقط، ولا تُعدّ بديلًا عن التشخيص والتقييم السريري المتخصص.';
