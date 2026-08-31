@@ -32,10 +32,18 @@ export function FeedbackPrompt() {
     return () => clearTimeout(timer);
   }, []);
 
-  const isValid = rating >= 1 && content.trim().length >= 5;
-
+  // الزر يبقى قابلاً للضغط دائمًا (لا disabled صامت) — الضغط بلا تقييم أو بنص قصير جدًا
+  // يُظهر رسالة توضح تحديدًا الناقص بدل ألا يحدث شيء إطلاقًا، وهذا بالضبط ما كان يبدو
+  // كزر "لا يعمل" لمستخدمة كتبت رأيها ونسيت الضغط على النجوم
   const submit = async () => {
-    if (!isValid) return;
+    if (rating < 1) {
+      setError("الرجاء اختيار تقييم بالنجوم قبل الإرسال");
+      return;
+    }
+    if (content.trim().length < 5) {
+      setError("الرجاء كتابة بضع كلمات عن تجربتكِ (5 أحرف على الأقل)");
+      return;
+    }
     setError(null);
     try {
       await createTestimonial.mutateAsync({ content: content.trim(), rating });
@@ -95,12 +103,7 @@ export function FeedbackPrompt() {
             <Button variant="ghost" className="flex-1" onClick={() => setOpen(false)}>
               لاحقاً
             </Button>
-            <Button
-              className="flex-1"
-              disabled={!isValid}
-              loading={createTestimonial.isPending}
-              onClick={submit}
-            >
+            <Button className="flex-1" loading={createTestimonial.isPending} onClick={submit}>
               إرسال
             </Button>
           </div>
