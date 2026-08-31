@@ -3,9 +3,13 @@ import { AssessmentDomainName, UrgentHelpStatus, UrgentHelpTriggerSource } from 
 import { PrismaService } from '../prisma/prisma.service';
 import { AppException } from '../common/exceptions/app.exception';
 import { SubmitAssessmentDto } from './dto/submit-assessment.dto';
-import { ASSESSMENT_DISCLAIMER_AR, classifyEpds, classifyGad7 } from './lib/classify';
-
-const MAX_OPTION_VALUE = 3;
+import {
+  ASSESSMENT_DISCLAIMER_AR,
+  classifyEpds,
+  classifyGad7,
+  classifyPtsd,
+  PTSD_SAFETY_THRESHOLD,
+} from './lib/classify';
 
 @Injectable()
 export class AssessmentsService {
@@ -77,23 +81,39 @@ export class AssessmentsService {
       });
     }
 
-    // القيمة المُرسَلة من العميل هي فهرس الخيار كما ظهر لها (0-3) لا الدرجة السريرية —
-    // البنود المعكوسة (reverseScored) تُحوَّل هنا فقط عبر (3 - القيمة الخام)، ولا يُرمَّز
-    // أي رقم بند بعينه في هذا المنطق إطلاقًا؛ العلامة تُقرأ من قاعدة البيانات حصرًا.
+    // القيمة المُرسَلة من العميل هي فهرس الخيار كما ظهر لها (0 وحتى عدد الخيارات-1) لا
+    // الدرجة السريرية — البنود المعكوسة (reverseScored) تُحوَّل هنا عبر (أقصى قيمة ممكنة
+    // لهذا البند تحديدًا - القيمة الخام)، وليس ثابتًا عامًا واحدًا: مقياسا GAD-7/EPDS بهما
+    // 4 خيارات (أقصى قيمة 3) بينما مقياس الصدمة له 5 خيارات (أقصى قيمة 4). لا يُرمَّز أي
+    // رقم بند بعينه في هذا المنطق إطلاقًا؛ العلامة تُقرأ من قاعدة البيانات حصرًا.
     let totalScore = 0;
-    let criticalTriggered = false;
+    let criticalItemTriggered = false;
     const answersData = dto.answers.map((a) => {
       const question = questionsById.get(a.questionId)!;
-      const scoredValue = question.reverseScored ? MAX_OPTION_VALUE - a.value : a.value;
+      const optionsCount = Array.isArray(question.optionsJson) ? question.optionsJson.length : 4;
+      const maxOptionValue = optionsCount - 1;
+      const scoredValue = question.reverseScored ? maxOptionValue - a.value : a.value;
       totalScore += scoredValue;
       if (question.isCritical && scoredValue > 0) {
-        criticalTriggered = true;
+        criticalItemTriggered = true;
       }
       return { questionId: a.questionId, rawValue: a.value, scoredValue };
     });
 
-    const classification =
-      domain.name === AssessmentDomainName.gad7 ? classifyGad7(totalScore) : classifyEpds(totalScore);
+    let classification;
+    if (domain.name === AssessmentDomainName.gad7) {
+      classification = classifyGad7(totalScore);
+    } else if (domain.name === AssessmentDomainName.epds) {
+      classification = classifyEpds(totalScore);
+    } else {
+      classification = classifyPtsd(totalScore);
+    }
+
+    // بروتوكول سلامة مقياس الصدمة التالية للولادة: لا بند حرج فردي كما في EPDS، بل عتبة
+    // مجموع كلي (>85 من 112) — مستقل تمامًا عن criticalItemTriggered أعلاه
+    const scoreThresholdTriggered =
+      domain.name === AssessmentDomainName.ptsd && totalScore > PTSD_SAFETY_THRESHOLD;
+    const requiresUrgentHelp = criticalItemTriggered || scoreThresholdTriggered;
 
     return this.prisma.$transaction(async (tx) => {
       const result = await tx.assessmentResult.create({
@@ -106,13 +126,16 @@ export class AssessmentsService {
         },
       });
 
-      // بروتوكول السلامة: بند حرج (البند العاشر من EPDS حاليًا) بدرجة محسوبة > 0 ينشئ
-      // urgent_help_request تلقائيًا في نفس الـtransaction — بغض النظر عن المجموع الكلي
-      const urgentHelpRequest = criticalTriggered
+      // بروتوكول السلامة: إما بند حرج فردي (البند العاشر من EPDS) بدرجة محسوبة > 0، أو
+      // تجاوز عتبة المجموع الكلي (مقياس الصدمة التالية للولادة) — كلاهما ينشئ
+      // urgent_help_request تلقائيًا في نفس الـtransaction، بمصدر مختلف يعكس السبب الفعلي
+      const urgentHelpRequest = requiresUrgentHelp
         ? await tx.urgentHelpRequest.create({
             data: {
               userId,
-              triggerSource: UrgentHelpTriggerSource.epds_critical_item,
+              triggerSource: scoreThresholdTriggered
+                ? UrgentHelpTriggerSource.assessment_score_threshold
+                : UrgentHelpTriggerSource.epds_critical_item,
               assessmentResultId: result.id,
               status: UrgentHelpStatus.open,
             },
@@ -123,7 +146,7 @@ export class AssessmentsService {
         ...result,
         domain,
         disclaimerText: ASSESSMENT_DISCLAIMER_AR,
-        requiresUrgentHelp: criticalTriggered,
+        requiresUrgentHelp,
         urgentHelpRequest,
       };
     });

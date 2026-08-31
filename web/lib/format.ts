@@ -481,6 +481,33 @@ export function epdsClassificationTone(classification: AssessmentClassification)
   }
 }
 
+// تصنيف مقياس الصدمة التالية للولادة — مستقل عن GAD-7/EPDS رغم مشاركة قيم low/medium/high
+// نفسها من enum واحد، بنفس منطق الفصل المتّبع أعلاه
+const PTSD_CLASSIFICATION_LABELS: Partial<Record<AssessmentClassification, string>> = {
+  low: "منخفض",
+  medium: "متوسط",
+  high: "مرتفع",
+  very_high: "مرتفع جداً",
+};
+
+export function ptsdClassificationLabel(classification: AssessmentClassification): string {
+  return PTSD_CLASSIFICATION_LABELS[classification] ?? classification;
+}
+
+export function ptsdClassificationTone(classification: AssessmentClassification): "success" | "warning" | "danger" {
+  switch (classification) {
+    case "low":
+      return "success";
+    case "medium":
+      return "warning";
+    case "high":
+    case "very_high":
+      return "danger";
+    default:
+      return "warning";
+  }
+}
+
 const URGENT_HELP_STATUS_LABELS: Record<UrgentHelpStatus, string> = {
   open: "مفتوح",
   contacted: "تم التواصل",

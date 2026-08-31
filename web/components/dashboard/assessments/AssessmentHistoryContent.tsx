@@ -12,21 +12,25 @@ import {
   formatArabicDateTime,
   gad7ClassificationLabel,
   gad7ClassificationTone,
+  ptsdClassificationLabel,
+  ptsdClassificationTone,
 } from "@/lib/format";
 import { useAssessmentHistory } from "@/lib/hooks/useAssessments";
 import { ApiError } from "@/lib/api-client";
-import type { AssessmentResult } from "@/lib/types";
+import type { AssessmentClassification, AssessmentResult } from "@/lib/types";
 
 function ScaleHistorySection({
   title,
   results,
   maxScore,
-  isGad7,
+  classificationLabel,
+  classificationTone,
 }: {
   title: string;
   results: AssessmentResult[];
   maxScore: number;
-  isGad7: boolean;
+  classificationLabel: (c: AssessmentClassification) => string;
+  classificationTone: (c: AssessmentClassification) => "success" | "accent" | "warning" | "danger";
 }) {
   const chartData = [...results]
     .sort((a, b) => new Date(a.takenAt).getTime() - new Date(b.takenAt).getTime())
@@ -77,10 +81,8 @@ function ScaleHistorySection({
                   <span className="text-sm font-semibold text-foreground">
                     {r.totalScore} / {maxScore}
                   </span>
-                  <Badge
-                    tone={isGad7 ? gad7ClassificationTone(r.classification) : epdsClassificationTone(r.classification)}
-                  >
-                    {isGad7 ? gad7ClassificationLabel(r.classification) : epdsClassificationLabel(r.classification)}
+                  <Badge tone={classificationTone(r.classification)}>
+                    {classificationLabel(r.classification)}
                   </Badge>
                 </div>
               </Card>
@@ -114,6 +116,7 @@ export function AssessmentHistoryContent() {
   const results = history.data ?? [];
   const gad7Results = results.filter((r) => r.domain?.name === "gad7");
   const epdsResults = results.filter((r) => r.domain?.name === "epds");
+  const ptsdResults = results.filter((r) => r.domain?.name === "ptsd");
   const legacyResults = results.filter((r) => r.domain?.isLegacy);
 
   if (results.length === 0) {
@@ -132,8 +135,27 @@ export function AssessmentHistoryContent() {
     <div className="flex flex-col gap-8">
       <h1 className="text-2xl font-extrabold text-foreground">سجل نتائجي</h1>
 
-      <ScaleHistorySection title="مقياس القلق العام (GAD-7)" results={gad7Results} maxScore={21} isGad7 />
-      <ScaleHistorySection title="مقياس إدنبرة لاكتئاب ما بعد الولادة (EPDS)" results={epdsResults} maxScore={30} isGad7={false} />
+      <ScaleHistorySection
+        title="مقياس القلق العام (GAD-7)"
+        results={gad7Results}
+        maxScore={21}
+        classificationLabel={gad7ClassificationLabel}
+        classificationTone={gad7ClassificationTone}
+      />
+      <ScaleHistorySection
+        title="مقياس إدنبرة لاكتئاب ما بعد الولادة (EPDS)"
+        results={epdsResults}
+        maxScore={30}
+        classificationLabel={epdsClassificationLabel}
+        classificationTone={epdsClassificationTone}
+      />
+      <ScaleHistorySection
+        title="مقياس ما بعد الصدمة التالي للولادة"
+        results={ptsdResults}
+        maxScore={112}
+        classificationLabel={ptsdClassificationLabel}
+        classificationTone={ptsdClassificationTone}
+      />
 
       {legacyResults.length > 0 && (
         <section className="border-t border-black/5 pt-6">

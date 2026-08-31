@@ -109,7 +109,7 @@ export function SettingsContent() {
           شاركينا رأيك
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">
-          تجربتك تساعد أمهات أخريات — رأيك سيُنشر في صفحة الهبوط بعد مراجعته من فريق التطبيق.
+          تجربتك تساعد أمهات أخريات — رأيك سيُنشر في صفحة الهبوط بعد مراجعته من فريق المنصة.
         </p>
         <div className="mt-4">
           <TestimonialForm />

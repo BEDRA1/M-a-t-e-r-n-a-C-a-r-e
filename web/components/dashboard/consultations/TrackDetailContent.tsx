@@ -12,6 +12,7 @@ import {
   Heart,
   HeartHandshake,
   MessageCircleHeart,
+  Shield,
   ShieldCheck,
   Sparkles,
   Users,
@@ -326,7 +327,7 @@ function TrackDetailInner({ track: trackCode }: { track: TrackCode }) {
           <h2 className="text-lg font-bold text-foreground">الاختبارات النفسية والتقييمات</h2>
           <p className="mt-1 text-sm text-muted">اختبارات معتمدة علمياً للكشف المبكر عن حالتكِ النفسية</p>
 
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="flex w-full max-w-full flex-col gap-3 rounded-2xl border border-violet-100 bg-violet-50 p-5">
               <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-violet-100 text-violet-600">
                 <Brain className="size-5" strokeWidth={2} />
@@ -353,6 +354,23 @@ function TrackDetailInner({ track: trackCode }: { track: TrackCode }) {
                   يكشف مبكراً عن اكتئاب ما بعد الولادة — 10 أسئلة
                 </p>
                 <p className="mt-2 text-xs font-semibold text-violet-700">المدة: 3-5 دقائق</p>
+              </div>
+              <Link href="/dashboard/assessments" className="mt-auto">
+                <Button className="w-full">ابدئي الاختبار</Button>
+              </Link>
+            </div>
+
+            <div className="flex w-full max-w-full flex-col gap-3 rounded-2xl border border-violet-100 bg-violet-50 p-5">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-pink-100 text-pink-800">
+                <Shield className="size-5" strokeWidth={2} />
+              </span>
+              <div>
+                <p className="font-bold text-foreground">مقياس ما بعد الصدمة التالي للولادة</p>
+                <p className="mt-1 break-words text-sm leading-relaxed text-muted">
+                  مقياس علمي معتمد للكشف عن أعراض الصدمة النفسية بعد الولادة — من تأليف فاضل آية وبن الشارف فلة
+                </p>
+                <p className="mt-2 text-xs font-semibold text-violet-700">المدة: 10-15 دقيقة</p>
+                <p className="mt-1 text-xs text-muted">مخصص للأمهات بعد الولادة</p>
               </div>
               <Link href="/dashboard/assessments" className="mt-auto">
                 <Button className="w-full">ابدئي الاختبار</Button>

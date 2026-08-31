@@ -37,7 +37,7 @@ export function TestimonialForm() {
   if (submitted) {
     return (
       <Alert tone="success">
-        شكرًا لمشاركتنا رأيك — سيُنشر بعد مراجعة فريق التطبيق.
+        شكراً لكِ على مشاركة رأيكِ! ملاحظاتكِ تساعدنا على تطوير المنصة باستمرار
       </Alert>
     );
   }
@@ -66,7 +66,7 @@ export function TestimonialForm() {
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        placeholder="شاركينا تجربتك مع التطبيق..."
+        placeholder="شاركينا تجربتك مع المنصة..."
         rows={3}
         maxLength={1000}
         className="w-full resize-none rounded-xl border border-black/10 bg-surface px-3.5 py-3 text-sm text-foreground placeholder:text-muted focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-300"

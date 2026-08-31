@@ -637,6 +637,55 @@ const EPDS_SEED = {
   ],
 };
 
+// مقياس ما بعد الصدمة التالية للولادة — من تأليف فاضل آية وبن الشارف فلة (2026). 28 بندًا
+// على مقياس 5 نقاط (0-4)، موزّعة على 4 أبعاد: إعادة معايشة (1-6)، تجنّب (7-13)، تغيّرات
+// سلبية في التفكير والمزاج (14-21)، استثارة نفسية وجسدية (22-28). لا بند حرج فردي هنا
+// (isCritical: false للكل) — بروتوكول السلامة مبني على عتبة المجموع الكلي (>85 من 112)
+// ويُحسب في AssessmentsService.submit عبر classifyPtsd/PTSD_SAFETY_THRESHOLD لا هنا.
+const PTSD_OPTIONS = ['أبداً', 'نادراً', 'أحياناً', 'غالباً', 'دائماً'];
+const PTSD_SEED = {
+  name: AssessmentDomainName.ptsd,
+  nameAr: 'مقياس ما بعد الصدمة التالي للولادة',
+  descriptionAr:
+    'مقياس علمي معتمد من تأليف فاضل آية وبن الشارف فلة (2026) للكشف عن أعراض الصدمة النفسية بعد الولادة',
+  instructionsAr:
+    'يرجى قراءة كل عبارة بتمعن والإجابة بصدق عن مدى انطباقها عليكِ خلال الفترة الأخيرة منذ ولادتكِ',
+  questions: [
+    // البُعد الأول — إعادة معايشة تجربة الولادة
+    { textAr: 'تراودني خلال اليوم ذكريات مزعجة تتعلق بلحظات الولادة.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أرى كوابيس متكررة تتعلق بالولادة.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أشعر بالضيق عند سماع قصص تتعلق بالولادة.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أشعر أحياناً أنني أعيش تجربة الولادة مرة أخرى بكل تفاصيلها.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'تتردد في ذهني أصوات الأطباء والقابلات والنساء أثناء الولادة.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أشعر بالخوف عندما أتعرض لروائح تذكرني بالمستشفى.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    // البُعد الثاني — تجنب مثيرات خبرة الولادة
+    { textAr: 'أتجنب الحديث عن تفاصيل ولادتي مع الآخرين.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أتجنب المرور من أمام المستشفى الذي تمت فيه الولادة.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أحاول تجنب زيارة طبيب النساء خوفاً من استعادة مشاعر الولادة.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أحاول جاهدةً ألا أتذكر اللحظات التي شعرت فيها بالعجز أثناء ولادتي.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أتجنب سماع قصص ولادات أخرى لأنها تذكرني بتجربتي في الولادة.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أتجنب العلاقة الحميمة خوفاً من حدوث حمل وتكرار معاناة الولادة.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'شددت من احتياطات منع الحمل خوفاً من تكرار تجربة الحمل والولادة.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    // البُعد الثالث — التغيرات السلبية في التفكير والمزاج
+    { textAr: 'ألوم نفسي بشدة لأن ولادتي لم تكن بالطريقة التي توقعتها.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'لم أعد أستمتع بالأشياء التي كانت تفرحني قبل ولادتي.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أشعر بالوحدة، وكأن لا أحد يفهم المعاناة التي مررت بها.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أشعر أن جسدي خذلني لأنه لم يعمل كما ينبغي أثناء الولادة.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أشعر بالغضب تجاه الطاقم الطبي بسبب ما حدث لي أثناء الولادة.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أشعر بالاستياء من المقربين مني لأنهم لم يدعموني في ولادتي.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'لا أستطيع تخيل نفسي أمر بتجربة ولادة جديدة بعد ما حدث لي.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أواجه صعوبة في التواصل العاطفي مع طفلي بسبب ما مررت به في الولادة.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    // البُعد الرابع — الاستثارة النفسية والجسدية
+    { textAr: 'أشعر بتوتر وقلق مستمرين دون سبب واضح.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أجد صعوبة في النوم بسبب الأفكار المتسارعة عن الحمل والولادة مرة أخرى.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أشعر بالخوف إذا مرض طفلي خوفاً من العودة للمستشفيات.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أعاني من نوبات غضب غير مبررة تجاه زوجي أو أهلي.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أبكي بسهولة لأسباب بسيطة أو تافهة بعد الولادة.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أنا في حالة قلق دائم وكأن شيئاً سيئاً سيحدث لي.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+    { textAr: 'أشعر بتسارع نبضات القلب وتوتر عضلي عند تذكر تفاصيل ولادتي.', options: PTSD_OPTIONS, reverseScored: false, isCritical: false },
+  ],
+};
+
 const DAILY_TIPS_SEED = [
   'اشربي كمية كافية من الماء يوميًا لتحافظي على ترطيب جسمك.',
   'خصصي 10 دقائق يوميًا للتنفس العميق والاسترخاء.',
@@ -2349,7 +2398,7 @@ async function main() {
   }
   console.log(`تم زرع ${ASSESSMENT_DOMAINS_SEED.length} محاور تقييم نفسي قديمة (legacy) بأسئلتها`);
 
-  for (const scaleSeed of [GAD7_SEED, EPDS_SEED]) {
+  for (const scaleSeed of [GAD7_SEED, EPDS_SEED, PTSD_SEED]) {
     const domain = await prisma.assessmentDomain.upsert({
       where: { name: scaleSeed.name },
       update: {
@@ -2383,7 +2432,7 @@ async function main() {
       }
     }
   }
-  console.log('تم زرع مقياسي GAD-7 (7 بنود) وEPDS (10 بنود) المعياريين');
+  console.log('تم زرع مقاييس GAD-7 (7 بنود) وEPDS (10 بنود) والصدمة التالية للولادة (28 بندًا) المعيارية');
 
   for (const [index, tipTextAr] of DAILY_TIPS_SEED.entries()) {
     await prisma.dailyTip.upsert({

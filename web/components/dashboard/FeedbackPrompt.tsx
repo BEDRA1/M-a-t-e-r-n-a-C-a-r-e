@@ -48,7 +48,14 @@ export function FeedbackPrompt() {
   return (
     <BottomSheet open={open} onClose={() => setOpen(false)} title={TITLE}>
       {submitted ? (
-        <Alert tone="success">شكراً لمشاركتكِ! رأيكِ سيساعدنا على التحسين المستمر</Alert>
+        <div className="flex flex-col gap-4">
+          <Alert tone="success">
+            شكراً لكِ على مشاركة رأيكِ! ملاحظاتكِ تساعدنا على تطوير المنصة باستمرار
+          </Alert>
+          <Button variant="ghost" className="w-full" onClick={() => setOpen(false)}>
+            إغلاق
+          </Button>
+        </div>
       ) : (
         <div className="flex flex-col gap-4">
           <p className="text-sm text-muted">ساعدينا على تحسين المنصة بمشاركة ملاحظاتكِ</p>

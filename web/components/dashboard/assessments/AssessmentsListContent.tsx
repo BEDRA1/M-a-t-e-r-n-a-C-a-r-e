@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Brain, ClipboardList, HeartPulse, History } from "lucide-react";
+import { Brain, ClipboardList, HeartPulse, History, Shield } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -13,7 +13,7 @@ import { ApiError } from "@/lib/api-client";
 import { ManualUrgentHelpButton } from "./ManualUrgentHelpButton";
 import type { AssessmentDomain } from "@/lib/types";
 
-const DOMAIN_ICON = { gad7: Brain, epds: HeartPulse } as const;
+const DOMAIN_ICON = { gad7: Brain, epds: HeartPulse, ptsd: Shield } as const;
 
 export function AssessmentsListContent() {
   const domains = useAssessmentDomains();
