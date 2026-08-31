@@ -4,10 +4,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   Apple,
+  Brain,
   Calendar,
   Check,
   CheckCircle2,
   GraduationCap,
+  Heart,
   HeartHandshake,
   MessageCircleHeart,
   ShieldCheck,
@@ -57,6 +59,7 @@ function TrackDetailInner({ track: trackCode }: { track: TrackCode }) {
   const visibleSpecialists = filterVisibleSpecialists(trackCode, specialists.data ?? []);
   const Icon = track.icon;
   const isNutrition = trackCode === "nutrition";
+  const isPsychological = trackCode === "psychological";
   const featuredSpecialist = visibleSpecialists[0];
 
   const inPersonConsultationPrice = findPrice(pricing.data, "consultation", "in_person");
@@ -317,6 +320,51 @@ function TrackDetailInner({ track: trackCode }: { track: TrackCode }) {
           )}
         </div>
       </section>
+
+      {isPsychological && (
+        <section>
+          <h2 className="text-lg font-bold text-foreground">الاختبارات النفسية والتقييمات</h2>
+          <p className="mt-1 text-sm text-muted">اختبارات معتمدة علمياً للكشف المبكر عن حالتكِ النفسية</p>
+
+          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="flex w-full max-w-full flex-col gap-3 rounded-2xl border border-violet-100 bg-violet-50 p-5">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-violet-100 text-violet-600">
+                <Brain className="size-5" strokeWidth={2} />
+              </span>
+              <div>
+                <p className="font-bold text-foreground">مقياس القلق العام GAD-7</p>
+                <p className="mt-1 break-words text-sm leading-relaxed text-muted">
+                  يقيس مستوى القلق خلال الأسبوعين الماضيين — 7 أسئلة فقط
+                </p>
+                <p className="mt-2 text-xs font-semibold text-violet-700">المدة: 2-3 دقائق</p>
+              </div>
+              <Link href="/dashboard/assessments" className="mt-auto">
+                <Button className="w-full">ابدئي الاختبار</Button>
+              </Link>
+            </div>
+
+            <div className="flex w-full max-w-full flex-col gap-3 rounded-2xl border border-violet-100 bg-violet-50 p-5">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-pink-100 text-pink-600">
+                <Heart className="size-5" strokeWidth={2} />
+              </span>
+              <div>
+                <p className="font-bold text-foreground">مقياس إدنبرة EPDS</p>
+                <p className="mt-1 break-words text-sm leading-relaxed text-muted">
+                  يكشف مبكراً عن اكتئاب ما بعد الولادة — 10 أسئلة
+                </p>
+                <p className="mt-2 text-xs font-semibold text-violet-700">المدة: 3-5 دقائق</p>
+              </div>
+              <Link href="/dashboard/assessments" className="mt-auto">
+                <Button className="w-full">ابدئي الاختبار</Button>
+              </Link>
+            </div>
+          </div>
+
+          <p className="mt-3 text-xs leading-relaxed text-muted">
+            هذه المقاييس للفحص الأولي فقط ولا تُغني عن الاستشارة المتخصصة
+          </p>
+        </section>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/server/get-current-user";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { FloatingPillNav } from "@/components/dashboard/FloatingPillNav";
 import { DashboardBottomNav } from "@/components/dashboard/DashboardBottomNav";
+import { FeedbackPrompt } from "@/components/dashboard/FeedbackPrompt";
 
 export default async function DashboardLayout({
   children,
@@ -27,6 +28,7 @@ export default async function DashboardLayout({
       </main>
       <FloatingPillNav user={user} />
       <DashboardBottomNav user={user} />
+      <FeedbackPrompt />
     </div>
   );
 }
