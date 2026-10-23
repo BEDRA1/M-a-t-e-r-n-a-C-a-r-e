@@ -18,13 +18,16 @@ export interface TrackConfig {
   code: TrackCode;
   name: string;
   specialistTitle: string;
+  /** صيغة الجمع الصحيحة لـspecialistTitle — لا تُشتَق تلقائيًا بإضافة "ات" في مكان الاستخدام
+   * (ذلك يُنتج جموعًا مكسورة نحويًا مثل "قابلةات"، "أخصائية نفسانيةات") */
+  specialistTitlePlural: string;
   description: string;
   icon: LucideIcon;
   colors: TrackColorClasses;
   consultationIncludes: string[];
   courseFeatures: string[];
-  /** صورة غلاف موضوعية لدورات هذا المسار — رابط images.unsplash.com حقيقي تحقّقتُ منه بـcurl
-   * مباشرةً (source.unsplash.com المطلوب أصلًا خدمة متوقفة نهائيًا من Unsplash، ترجع 503) */
+  /** صورة غلاف حقيقية بعلامة Materna Care التجارية من public/الدورات/ (وُفّرت مباشرة، صورة
+   * واحدة لكل مسار تُستخدَم لكل دوراته) — لم تعد روابط Unsplash خارجية مؤقتة */
   courseCoverImage: string;
 }
 
@@ -33,6 +36,7 @@ export const TRACKS: Record<TrackCode, TrackConfig> = {
     code: "psychological",
     name: "المرافقة النفسية",
     specialistTitle: "أخصائية نفسانية",
+    specialistTitlePlural: "أخصائيات نفسانيات",
     description: "دعم نفسي متخصص يرافقك في التعامل مع القلق والتوتر وتقلبات المشاعر خلال رحلتك.",
     icon: Brain,
     colors: {
@@ -53,12 +57,13 @@ export const TRACKS: Record<TrackCode, TrackConfig> = {
       "شهادة مشاركة في نهاية الدورة",
       "مواد تعليمية ودعم مستمر",
     ],
-    courseCoverImage: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&q=80&auto=format&fit=crop",
+    courseCoverImage: "/الدورات/المرافقة النفسية.jpg",
   },
   health: {
     code: "health",
     name: "المرافقة الصحية",
     specialistTitle: "قابلة",
+    specialistTitlePlural: "قابلات",
     description: "متابعة صحية مهنية من قابلة معتمدة، تواكبك في كل مرحلة من الحمل والاستعداد للولادة.",
     icon: HeartPulse,
     colors: {
@@ -78,12 +83,13 @@ export const TRACKS: Record<TrackCode, TrackConfig> = {
       "الاستعداد للولادة والعناية بالأم",
       "التوعية بالرضاعة والعناية بالطفل",
     ],
-    courseCoverImage: "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=400&q=80&auto=format&fit=crop",
+    courseCoverImage: "/الدورات/المرافقة الصحية.jpg",
   },
   nutrition: {
     code: "nutrition",
     name: "المرافقة الغذائية",
     specialistTitle: "أخصائية تغذية",
+    specialistTitlePlural: "أخصائيات تغذية",
     description: "برنامج غذائي مخصص من أخصائية تغذية، يواكب احتياجاتك الغذائية في كل مرحلة.",
     icon: Salad,
     colors: {
@@ -104,7 +110,7 @@ export const TRACKS: Record<TrackCode, TrackConfig> = {
       "التغذية في فترة الرضاعة",
       "نصائح عملية وتطبيقية",
     ],
-    courseCoverImage: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80&auto=format&fit=crop",
+    courseCoverImage: "/الدورات/المرافقة الغذائية.jpg",
   },
 };
 

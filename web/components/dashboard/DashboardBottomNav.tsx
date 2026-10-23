@@ -6,7 +6,8 @@ import { Bell, CalendarDays, ChevronLeft, House, LogOut, Settings2, User, Users 
 import { cn } from "@/lib/cn";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { bottomNavExtraItems, isNavPathActive } from "./nav-links";
-import { useNotifications } from "@/lib/hooks/useNotifications";
+import { useUnreadNotificationsCount } from "@/lib/hooks/useNotifications";
+import { NotificationBadge } from "./NotificationBadge";
 import { useLogout } from "@/lib/hooks/useAuth";
 import type { User as UserType } from "@/lib/types";
 import { useState } from "react";
@@ -76,8 +77,7 @@ function AccountSheet({ open, onClose }: { open: boolean; onClose: () => void })
 export function DashboardBottomNav({ user: _user }: { user: UserType }) {
   const pathname = usePathname();
   const [accountOpen, setAccountOpen] = useState(false);
-  const notifications = useNotifications();
-  const unreadCount = notifications.data?.filter((n) => !n.isRead).length ?? 0;
+  const unreadCount = useUnreadNotificationsCount();
 
   const isActive = (href: string) => isNavPathActive(pathname, href);
   const homeActive = isActive("/dashboard");
@@ -109,11 +109,7 @@ export function DashboardBottomNav({ user: _user }: { user: UserType }) {
           <Link href={bottomNavExtraItems.notifications.href} className={tabClasses(notificationsActive)}>
             <span className="relative">
               <Bell className="size-6" strokeWidth={2} />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1.5 -end-2 flex min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-[16px] text-white">
-                  {unreadCount}
-                </span>
-              )}
+              <NotificationBadge count={unreadCount} />
             </span>
             الإشعارات
           </Link>

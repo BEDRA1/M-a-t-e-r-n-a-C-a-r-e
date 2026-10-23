@@ -16,8 +16,18 @@ export function TestimonialForm() {
   const [submitted, setSubmitted] = useState(false);
   const createTestimonial = useCreateTestimonial();
 
+  // الزر يبقى قابلاً للضغط دائمًا (لا disabled صامت) — الضغط بلا تقييم أو بنص قصير جدًا
+  // يُظهر رسالة توضح تحديدًا الناقص بدل ألا يحدث شيء إطلاقًا، وهذا بالضبط ما كان يبدو
+  // كزر "لا يعمل" لمستخدمة كتبت رأيها ونسيت الضغط على النجوم
   const submit = async () => {
-    if (rating < 1 || content.trim().length < 5) return;
+    if (rating < 1) {
+      setError("الرجاء اختيار تقييم بالنجوم قبل الإرسال");
+      return;
+    }
+    if (content.trim().length < 5) {
+      setError("الرجاء كتابة بضع كلمات عن تجربتكِ (5 أحرف على الأقل)");
+      return;
+    }
     setError(null);
     try {
       await createTestimonial.mutateAsync({
@@ -37,7 +47,7 @@ export function TestimonialForm() {
   if (submitted) {
     return (
       <Alert tone="success">
-        شكرًا لمشاركتنا رأيك — سيُنشر بعد مراجعة فريق التطبيق.
+        شكراً لكِ على مشاركة رأيكِ! ملاحظاتكِ تساعدنا على تطوير المنصة باستمرار
       </Alert>
     );
   }
@@ -66,7 +76,7 @@ export function TestimonialForm() {
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        placeholder="شاركينا تجربتك مع التطبيق..."
+        placeholder="شاركينا تجربتك مع المنصة..."
         rows={3}
         maxLength={1000}
         className="w-full resize-none rounded-xl border border-black/10 bg-surface px-3.5 py-3 text-sm text-foreground placeholder:text-muted focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-300"
@@ -81,12 +91,7 @@ export function TestimonialForm() {
       />
 
       <div className="flex sm:justify-end">
-        <Button
-          onClick={submit}
-          disabled={rating < 1 || content.trim().length < 5}
-          loading={createTestimonial.isPending}
-          className="w-full sm:w-auto"
-        >
+        <Button onClick={submit} loading={createTestimonial.isPending} className="w-full sm:w-auto">
           إرسال رأيي
         </Button>
       </div>

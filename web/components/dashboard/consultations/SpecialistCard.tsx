@@ -13,9 +13,9 @@ export function SpecialistCard({ specialist }: { specialist: Specialist }) {
           <span className="size-14 shrink-0 overflow-hidden rounded-full">
             <ImageWithFallback src={specialistPhotoSrc(specialist)} alt={specialist.fullName} icon={UserRound} className="size-full" />
           </span>
-          <div className="min-w-0">
-            <p className="font-bold text-foreground">{specialist.fullName}</p>
-            <p className="text-sm text-muted">{specialist.specialty}</p>
+          <div className="min-w-0 flex-1">
+            <p className="line-clamp-1 break-words font-bold text-foreground">{specialist.fullName}</p>
+            <p className="line-clamp-1 break-words text-sm text-muted">{specialist.specialty}</p>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
               <span className="flex items-center gap-1">
                 <Briefcase className="size-3.5" strokeWidth={2} />

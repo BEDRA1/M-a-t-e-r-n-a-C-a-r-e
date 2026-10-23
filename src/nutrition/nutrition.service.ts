@@ -20,8 +20,8 @@ export class NutritionService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getCurrentWeekMeals() {
-    const weekStartDate = this.getCurrentWeekStart();
-    const meals = await this.prisma.weeklyMeal.findMany({ where: { weekStartDate } });
+    // بدون فلتر على الأسبوع: تظهر الوجبات دائمًا مهما كان weekStartDate
+    const meals = await this.prisma.weeklyMeal.findMany();
     return meals.sort((a, b) => {
       if (a.dayOfWeek !== b.dayOfWeek) return a.dayOfWeek - b.dayOfWeek;
       return MEAL_TYPE_ORDER[a.mealType] - MEAL_TYPE_ORDER[b.mealType];
@@ -122,13 +122,5 @@ export class NutritionService {
       });
     }
     return order;
-  }
-
-  /** بداية الأسبوع الحالي: الأحد 00:00 بتوقيت UTC، بنفس ترميز dayOfWeek (0 = الأحد) */
-  private getCurrentWeekStart(): Date {
-    const now = new Date();
-    return new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - now.getUTCDay()),
-    );
   }
 }

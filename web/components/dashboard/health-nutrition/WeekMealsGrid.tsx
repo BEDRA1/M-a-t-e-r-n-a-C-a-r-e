@@ -1,10 +1,10 @@
 "use client";
 
-import { Card } from "@/components/ui/Card";
-import { cn } from "@/lib/cn";
+import { useMemo, useState } from "react";
+import { HorizontalScroller } from "@/components/ui/HorizontalScroller";
 import { dayOfWeekLabel } from "@/lib/format";
 import type { WeeklyMeal } from "@/lib/types";
-import { MealItemRow } from "./MealItemRow";
+import { MealDayCard } from "./MealDayCard";
 
 export function WeekMealsGrid({
   meals,
@@ -17,42 +17,59 @@ export function WeekMealsGrid({
   onIncrement: (meal: WeeklyMeal) => void;
   onDecrement: (mealId: string) => void;
 }) {
-  const byDay = new Map<number, WeeklyMeal[]>();
-  for (const meal of meals) {
-    const list = byDay.get(meal.dayOfWeek) ?? [];
-    list.push(meal);
-    byDay.set(meal.dayOfWeek, list);
-  }
+  const byDay = useMemo(() => {
+    const map = new Map<number, WeeklyMeal[]>();
+    for (const meal of meals) {
+      const list = map.get(meal.dayOfWeek) ?? [];
+      list.push(meal);
+      map.set(meal.dayOfWeek, list);
+    }
+    return map;
+  }, [meals]);
 
-  const days = Array.from({ length: 7 }, (_, day) => day).filter((day) => byDay.has(day));
+  const days = useMemo(
+    () => Array.from({ length: 7 }, (_, day) => day).filter((day) => byDay.has(day)),
+    [byDay],
+  );
+
+  const todayDayOfWeek = new Date().getDay();
+  const [selectedDay, setSelectedDay] = useState(() =>
+    days.includes(todayDayOfWeek) ? todayDayOfWeek : (days[0] ?? 0),
+  );
+  const activeDay = days.includes(selectedDay) ? selectedDay : (days[0] ?? 0);
+  const dayMeals = byDay.get(activeDay) ?? [];
 
   return (
-    <div
-      className={cn(
-        "flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1",
-        "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-        "sm:grid sm:grid-cols-2 sm:overflow-visible sm:snap-none sm:pb-0 xl:grid-cols-3",
-      )}
-    >
-      {days.map((day) => (
-        <Card
-          key={day}
-          className="flex min-w-[85%] shrink-0 snap-start flex-col gap-3 sm:min-w-0 sm:shrink sm:snap-align-none"
-        >
-          <p className="font-bold text-foreground">{dayOfWeekLabel(day)}</p>
-          <div className="flex flex-col gap-2.5">
-            {byDay.get(day)!.map((meal) => (
-              <MealItemRow
-                key={meal.id}
-                meal={meal}
-                quantity={cart[meal.id] ?? 0}
-                onIncrement={() => onIncrement(meal)}
-                onDecrement={() => onDecrement(meal.id)}
-              />
-            ))}
-          </div>
-        </Card>
-      ))}
+    <div className="flex min-w-0 w-full max-w-full flex-col gap-5">
+      <HorizontalScroller>
+        {days.map((day) => {
+          const isActive = day === activeDay;
+          return (
+            <button
+              key={day}
+              type="button"
+              onClick={() => setSelectedDay(day)}
+              className={`shrink-0 snap-start rounded-full px-4 py-2 text-sm font-bold transition-colors ${
+                isActive ? "bg-primary-500 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              {dayOfWeekLabel(day)}
+            </button>
+          );
+        })}
+      </HorizontalScroller>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {dayMeals.map((meal) => (
+          <MealDayCard
+            key={meal.id}
+            meal={meal}
+            quantity={cart[meal.id] ?? 0}
+            onIncrement={() => onIncrement(meal)}
+            onDecrement={() => onDecrement(meal.id)}
+          />
+        ))}
+      </div>
     </div>
   );
 }

@@ -10,15 +10,26 @@ import {
   epdsClassificationTone,
   gad7ClassificationLabel,
   gad7ClassificationTone,
+  ptsdClassificationLabel,
+  ptsdClassificationTone,
 } from "@/lib/format";
 import { ASSESSMENT_DISCLAIMER_AR } from "@/lib/assessment-disclaimer";
 import type { AssessmentDomainName, SubmitAssessmentResponse } from "@/lib/types";
 
 export function AssessmentResultView({ result }: { result: SubmitAssessmentResponse }) {
   const domainName = result.domain.name as AssessmentDomainName;
-  const isGad7 = domainName === "gad7";
-  const label = isGad7 ? gad7ClassificationLabel(result.classification) : epdsClassificationLabel(result.classification);
-  const tone = isGad7 ? gad7ClassificationTone(result.classification) : epdsClassificationTone(result.classification);
+  let label: string;
+  let tone: "success" | "accent" | "warning" | "danger";
+  if (domainName === "gad7") {
+    label = gad7ClassificationLabel(result.classification);
+    tone = gad7ClassificationTone(result.classification);
+  } else if (domainName === "ptsd") {
+    label = ptsdClassificationLabel(result.classification);
+    tone = ptsdClassificationTone(result.classification);
+  } else {
+    label = epdsClassificationLabel(result.classification);
+    tone = epdsClassificationTone(result.classification);
+  }
 
   return (
     <Card className="mx-auto flex max-w-xl flex-col items-center gap-5 py-10 text-center">

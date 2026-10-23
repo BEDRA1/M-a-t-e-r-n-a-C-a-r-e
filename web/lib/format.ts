@@ -58,6 +58,8 @@ const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   booking_confirmed: "تأكيد حجز",
   appointment_reminder: "تذكير بموعد",
   general: "عام",
+  vaccination_reminder: "تذكير بالتلقيحات",
+  daily_tip: "نصيحة اليوم",
 };
 
 export function notificationTypeLabel(type: NotificationType): string {
@@ -210,16 +212,6 @@ const HOME_SERVICE_NAME_OVERRIDES: Record<string, string> = {
 
 export function homeServiceDisplayName(name: string): string {
   return HOME_SERVICE_NAME_OVERRIDES[name] ?? name;
-}
-
-// أمثلة قائمة/ميني مصغّرة تُعرض على بطاقة "الأكل الصحي" تحديدًا — نص عرض من طرف الواجهة فقط،
-// لا يُخزَّن في وصف الخدمة بقاعدة البيانات
-const HOME_SERVICE_MENU_HIGHLIGHTS: Record<string, string[]> = {
-  "طبخ منزلي": ["سلطات طازجة", "أطباق متوازنة", "وجبات خفيفة صحية", "خيارات نباتية"],
-};
-
-export function homeServiceMenuHighlights(name: string): string[] | null {
-  return HOME_SERVICE_MENU_HIGHLIGHTS[name] ?? null;
 }
 
 const DAY_OF_WEEK_LABELS: Record<number, string> = {
@@ -483,6 +475,33 @@ export function epdsClassificationTone(classification: AssessmentClassification)
     case "needs_followup":
       return "warning";
     case "high":
+      return "danger";
+    default:
+      return "warning";
+  }
+}
+
+// تصنيف مقياس الصدمة التالية للولادة — مستقل عن GAD-7/EPDS رغم مشاركة قيم low/medium/high
+// نفسها من enum واحد، بنفس منطق الفصل المتّبع أعلاه
+const PTSD_CLASSIFICATION_LABELS: Partial<Record<AssessmentClassification, string>> = {
+  low: "منخفض",
+  medium: "متوسط",
+  high: "مرتفع",
+  very_high: "مرتفع جداً",
+};
+
+export function ptsdClassificationLabel(classification: AssessmentClassification): string {
+  return PTSD_CLASSIFICATION_LABELS[classification] ?? classification;
+}
+
+export function ptsdClassificationTone(classification: AssessmentClassification): "success" | "warning" | "danger" {
+  switch (classification) {
+    case "low":
+      return "success";
+    case "medium":
+      return "warning";
+    case "high":
+    case "very_high":
       return "danger";
     default:
       return "warning";

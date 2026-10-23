@@ -12,7 +12,13 @@ import { TestimonialForm } from "./TestimonialForm";
 import { DataPrivacySection } from "./DataPrivacySection";
 import type { NotificationType } from "@/lib/types";
 
-const SENT_NOTIFICATION_TYPES: NotificationType[] = ["appointment_reminder", "booking_confirmed", "general"];
+const SENT_NOTIFICATION_TYPES: NotificationType[] = [
+  "appointment_reminder",
+  "booking_confirmed",
+  "general",
+  "vaccination_reminder",
+  "daily_tip",
+];
 
 export function SettingsContent() {
   const logout = useLogout();
@@ -103,7 +109,7 @@ export function SettingsContent() {
           شاركينا رأيك
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">
-          تجربتك تساعد أمهات أخريات — رأيك سيُنشر في صفحة الهبوط بعد مراجعته من فريق التطبيق.
+          تجربتك تساعد أمهات أخريات — رأيك سيُنشر في صفحة الهبوط بعد مراجعته من فريق المنصة.
         </p>
         <div className="mt-4">
           <TestimonialForm />

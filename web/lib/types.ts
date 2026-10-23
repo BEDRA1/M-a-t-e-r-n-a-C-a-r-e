@@ -75,7 +75,12 @@ export interface Family {
   createdAt: string;
 }
 
-export type NotificationType = "booking_confirmed" | "appointment_reminder" | "general";
+export type NotificationType =
+  | "booking_confirmed"
+  | "appointment_reminder"
+  | "general"
+  | "vaccination_reminder"
+  | "daily_tip";
 
 export interface Notification {
   id: string;
@@ -260,7 +265,8 @@ export type AssessmentDomainName =
   | "pressure"
   | "sleep"
   | "gad7"
-  | "epds";
+  | "epds"
+  | "ptsd";
 
 export type AssessmentClassification =
   | "low"
@@ -270,7 +276,8 @@ export type AssessmentClassification =
   | "mild"
   | "moderate"
   | "severe"
-  | "needs_followup";
+  | "needs_followup"
+  | "very_high";
 
 export interface AssessmentDomain {
   id: string;
@@ -320,7 +327,7 @@ export interface SubmitAssessmentResponse extends AssessmentResult {
   urgentHelpRequest: UrgentHelpRequest | null;
 }
 
-export type UrgentHelpTriggerSource = "epds_critical_item" | "manual_button";
+export type UrgentHelpTriggerSource = "epds_critical_item" | "manual_button" | "assessment_score_threshold";
 export type UrgentHelpStatus = "open" | "contacted" | "closed";
 
 export interface UrgentHelpRequest {

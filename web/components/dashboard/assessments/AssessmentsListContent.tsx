@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Brain, ClipboardList, HeartPulse, History } from "lucide-react";
+import { Brain, ClipboardList, HeartPulse, History, Shield } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -13,7 +13,7 @@ import { ApiError } from "@/lib/api-client";
 import { ManualUrgentHelpButton } from "./ManualUrgentHelpButton";
 import type { AssessmentDomain } from "@/lib/types";
 
-const DOMAIN_ICON = { gad7: Brain, epds: HeartPulse } as const;
+const DOMAIN_ICON = { gad7: Brain, epds: HeartPulse, ptsd: Shield } as const;
 
 export function AssessmentsListContent() {
   const domains = useAssessmentDomains();
@@ -61,10 +61,10 @@ export function AssessmentsListContent() {
                 <span className="flex size-12 items-center justify-center rounded-2xl bg-primary-100 text-primary-700">
                   <Icon className="size-6" strokeWidth={2} />
                 </span>
-                <div className="flex-1">
-                  <p className="font-extrabold text-foreground">{domain.nameAr}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="break-words font-extrabold text-foreground">{domain.nameAr}</p>
                   {domain.descriptionAr && (
-                    <p className="mt-1.5 text-sm leading-relaxed text-muted">{domain.descriptionAr}</p>
+                    <p className="mt-1.5 break-words text-sm leading-relaxed text-muted">{domain.descriptionAr}</p>
                   )}
                 </div>
                 <Link href={`/dashboard/assessments/${domain.id}`}>

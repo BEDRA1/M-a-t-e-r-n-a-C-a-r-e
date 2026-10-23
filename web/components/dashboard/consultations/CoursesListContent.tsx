@@ -60,7 +60,7 @@ export function CoursesListContent() {
               type="button"
               onClick={() => setTypeFilter(tab.value)}
               className={cn(
-                "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                "min-h-[44px] rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
                 typeFilter === tab.value
                   ? "bg-primary-500 text-white"
                   : "bg-primary-50 text-primary-700 hover:bg-primary-100",
@@ -98,20 +98,9 @@ export function CoursesListContent() {
           <p>لا توجد دورات مطابقة لهذا الفلتر حاليًا.</p>
         </Card>
       ) : (
-        <div
-          className={cn(
-            "flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1",
-            "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-            "sm:grid sm:grid-cols-2 sm:overflow-visible sm:snap-none sm:pb-0 lg:grid-cols-3",
-          )}
-        >
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {courses.data.map((course) => (
-            <div
-              key={course.id}
-              className="min-w-[78%] shrink-0 snap-start sm:min-w-0 sm:shrink sm:snap-align-none"
-            >
-              <CourseCard course={course} />
-            </div>
+            <CourseCard key={course.id} course={course} />
           ))}
         </div>
       )}

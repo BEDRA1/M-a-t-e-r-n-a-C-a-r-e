@@ -4,12 +4,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   Apple,
+  Brain,
   Calendar,
   Check,
   CheckCircle2,
   GraduationCap,
+  Heart,
   HeartHandshake,
   MessageCircleHeart,
+  Shield,
   ShieldCheck,
   Sparkles,
   Users,
@@ -57,6 +60,7 @@ function TrackDetailInner({ track: trackCode }: { track: TrackCode }) {
   const visibleSpecialists = filterVisibleSpecialists(trackCode, specialists.data ?? []);
   const Icon = track.icon;
   const isNutrition = trackCode === "nutrition";
+  const isPsychological = trackCode === "psychological";
   const featuredSpecialist = visibleSpecialists[0];
 
   const inPersonConsultationPrice = findPrice(pricing.data, "consultation", "in_person");
@@ -93,7 +97,7 @@ function TrackDetailInner({ track: trackCode }: { track: TrackCode }) {
       {isNutrition && (
         <section>
           <h2 className="text-lg font-bold text-foreground">لماذا التغذية مهمة خلال الألف يوم؟</h2>
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {NUTRITION_WHY_POINTS.map(({ icon: PointIcon, text }) => (
               <div
                 key={text}
@@ -225,7 +229,7 @@ function TrackDetailInner({ track: trackCode }: { track: TrackCode }) {
               </p>
             )}
             <p className="text-sm font-medium text-muted">للجلسة الواحدة (عن بُعد)</p>
-            <Link href={`/dashboard/consultations/book?track=${track.code}`} className="mt-4 w-full max-w-[220px]">
+            <Link href={`/dashboard/consultations/book?track=${track.code}`} className="mt-4 w-full sm:max-w-[220px]">
               <Button
                 variant="ghost"
                 className="w-full rounded-full bg-gradient-to-l from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/30 hover:brightness-105"
@@ -247,16 +251,16 @@ function TrackDetailInner({ track: trackCode }: { track: TrackCode }) {
                   className="size-full"
                 />
               </span>
-              <div>
-                <p className="font-extrabold text-foreground">{featuredSpecialist.fullName}</p>
-                <p className="mt-0.5 text-sm text-muted">
+              <div className="min-w-0 w-full max-w-full px-2">
+                <p className="line-clamp-1 break-words font-extrabold text-foreground">{featuredSpecialist.fullName}</p>
+                <p className="mt-0.5 line-clamp-1 break-words text-sm text-muted">
                   {featuredSpecialist.specialty}
                   {featuredSpecialist.yearsExperience ? ` · ${featuredSpecialist.yearsExperience} سنوات خبرة` : ""}
                 </p>
               </div>
               <Link
                 href={`/dashboard/consultations/book?track=${track.code}&specialistId=${featuredSpecialist.id}`}
-                className="mt-1 w-full max-w-[220px]"
+                className="mt-1 w-full sm:max-w-[220px]"
               >
                 <Button variant="outline" className="w-full border-emerald-300 text-emerald-700 hover:bg-emerald-50">
                   احجزي معها الآن
@@ -271,7 +275,7 @@ function TrackDetailInner({ track: trackCode }: { track: TrackCode }) {
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-lg font-bold text-foreground">
             <Users className="size-5 text-muted" strokeWidth={2} />
-            {track.specialistTitle}ات هذا المسار
+            {track.specialistTitlePlural} هذا المسار
           </h2>
           <Link
             href={`/dashboard/consultations/specialists?track=${track.code}`}
@@ -283,7 +287,7 @@ function TrackDetailInner({ track: trackCode }: { track: TrackCode }) {
 
         <div className="mt-4">
           {specialists.isLoading ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Skeleton className="h-28 w-full" />
               <Skeleton className="h-28 w-full" />
             </div>
@@ -297,17 +301,17 @@ function TrackDetailInner({ track: trackCode }: { track: TrackCode }) {
               <p>لا يوجد أخصائيون معتمدون في هذا المسار حاليًا.</p>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {visibleSpecialists.map((specialist) => (
                 <Link
                   key={specialist.id}
                   href={`/dashboard/consultations/specialists/${specialist.id}`}
-                  className="flex items-center gap-3 rounded-2xl border border-black/5 bg-surface p-4 transition-all hover:border-black/10 active:scale-[0.99]"
+                  className="flex w-full max-w-full items-center gap-3 overflow-hidden rounded-2xl border border-black/5 bg-surface p-4 transition-all hover:border-black/10 active:scale-[0.99]"
                 >
                   <span className="size-12 shrink-0 overflow-hidden rounded-full">
                     <ImageWithFallback src={specialistPhotoSrc(specialist)} alt={specialist.fullName} icon={Users} className="size-full" />
                   </span>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-foreground">{specialist.fullName}</p>
                     <p className="truncate text-xs text-muted">{specialist.specialty}</p>
                   </div>
@@ -317,6 +321,68 @@ function TrackDetailInner({ track: trackCode }: { track: TrackCode }) {
           )}
         </div>
       </section>
+
+      {isPsychological && (
+        <section>
+          <h2 className="text-lg font-bold text-foreground">الاختبارات النفسية والتقييمات</h2>
+          <p className="mt-1 text-sm text-muted">اختبارات معتمدة علمياً للكشف المبكر عن حالتكِ النفسية</p>
+
+          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="flex w-full max-w-full flex-col gap-3 rounded-2xl border border-violet-100 bg-violet-50 p-5">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-violet-100 text-violet-600">
+                <Brain className="size-5" strokeWidth={2} />
+              </span>
+              <div>
+                <p className="font-bold text-foreground">مقياس القلق العام GAD-7</p>
+                <p className="mt-1 break-words text-sm leading-relaxed text-muted">
+                  يقيس مستوى القلق خلال الأسبوعين الماضيين — 7 أسئلة فقط
+                </p>
+                <p className="mt-2 text-xs font-semibold text-violet-700">المدة: 2-3 دقائق</p>
+              </div>
+              <Link href="/dashboard/assessments" className="mt-auto">
+                <Button className="w-full">ابدئي الاختبار</Button>
+              </Link>
+            </div>
+
+            <div className="flex w-full max-w-full flex-col gap-3 rounded-2xl border border-violet-100 bg-violet-50 p-5">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-pink-100 text-pink-600">
+                <Heart className="size-5" strokeWidth={2} />
+              </span>
+              <div>
+                <p className="font-bold text-foreground">مقياس إدنبرة EPDS</p>
+                <p className="mt-1 break-words text-sm leading-relaxed text-muted">
+                  يكشف مبكراً عن اكتئاب ما بعد الولادة — 10 أسئلة
+                </p>
+                <p className="mt-2 text-xs font-semibold text-violet-700">المدة: 3-5 دقائق</p>
+              </div>
+              <Link href="/dashboard/assessments" className="mt-auto">
+                <Button className="w-full">ابدئي الاختبار</Button>
+              </Link>
+            </div>
+
+            <div className="flex w-full max-w-full flex-col gap-3 rounded-2xl border border-violet-100 bg-violet-50 p-5">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-pink-100 text-pink-800">
+                <Shield className="size-5" strokeWidth={2} />
+              </span>
+              <div>
+                <p className="font-bold text-foreground">مقياس ما بعد الصدمة التالي للولادة</p>
+                <p className="mt-1 break-words text-sm leading-relaxed text-muted">
+                  مقياس علمي معتمد للكشف عن أعراض الصدمة النفسية بعد الولادة — من تأليف فاضل آية وبن الشارف فلة
+                </p>
+                <p className="mt-2 text-xs font-semibold text-violet-700">المدة: 10-15 دقيقة</p>
+                <p className="mt-1 text-xs text-muted">مخصص للأمهات بعد الولادة</p>
+              </div>
+              <Link href="/dashboard/assessments" className="mt-auto">
+                <Button className="w-full">ابدئي الاختبار</Button>
+              </Link>
+            </div>
+          </div>
+
+          <p className="mt-3 text-xs leading-relaxed text-muted">
+            هذه المقاييس للفحص الأولي فقط ولا تُغني عن الاستشارة المتخصصة
+          </p>
+        </section>
+      )}
     </div>
   );
 }

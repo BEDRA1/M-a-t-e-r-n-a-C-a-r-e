@@ -45,7 +45,7 @@ export function Features() {
       >
         <HeartbeatIcon className="mx-auto mb-2 size-7" />
         <h2 className="text-3xl font-extrabold text-foreground sm:text-4xl">
-          كل ما تحتاجينه في رحلة الحمل
+          كل ما تحتاجينه في رحلة الألف يوم
         </h2>
         <p className="mt-4 text-muted">
           أدوات بسيطة ودقيقة صُممت لتواكب كل مرحلة، بدعم كامل للغة العربية.

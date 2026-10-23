@@ -20,6 +20,10 @@ export function useCourses(filters: CourseFilters = {}) {
   return useQuery({
     queryKey: ["courses", filters.type ?? "all", filters.upcomingOnly ?? false, filters.track ?? "all"],
     queryFn: () => apiGet<Course[]>(query ? `courses?${query}` : "courses"),
+    // enrolledCount والسعة الظاهرة هنا تتغيّر بسرعة (تسجيلات مستخدمين آخرين لحظيًا) — لا تعتمد
+    // على الـstaleTime العام (30 ثانية) في app/providers.tsx، تُجلَب من جديد عند كل دخول للصفحة
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 }
 
@@ -28,6 +32,8 @@ export function useCourse(id: string | undefined) {
     queryKey: ["courses", "detail", id],
     queryFn: () => apiGet<Course>(`courses/${id}`),
     enabled: Boolean(id),
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 }
 
@@ -48,6 +54,9 @@ export function useMyCourseEnrollments() {
   return useQuery({
     queryKey: ["enrollments", "mine"],
     queryFn: () => apiGet<CourseEnrollment[]>("enrollments/mine"),
+    // نفس سبب useCourses أعلاه — لا تُعرض تسجيلات محتملة قديمة (من حساب سابق في نفس التبويب)
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 }
 

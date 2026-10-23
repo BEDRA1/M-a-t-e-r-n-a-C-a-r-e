@@ -25,7 +25,7 @@ export class SpecialistsService {
   }
 
   async listApproved(specialty?: string, track?: SpecialistTrack) {
-    return this.prisma.specialist.findMany({
+    const specialists = await this.prisma.specialist.findMany({
       where: {
         status: SpecialistStatus.approved,
         ...(specialty ? { specialty: { contains: specialty, mode: 'insensitive' } } : {}),
@@ -34,6 +34,10 @@ export class SpecialistsService {
       include: { user: { select: { id: true, wilaya: true } } },
       orderBy: { createdAt: 'desc' },
     });
+    // لا يوجد حقل sortOrder في الـschema (إضافته تتطلب migration)، فيُرتَّب هنا: فاضل آية أولًا
+    // ثم بن الشارف فلة ثم الباقي بترتيب createdAt التنازلي (sort مستقر)
+    const priority = (name: string) => (name === 'فاضل آية' ? 0 : name === 'بن الشارف فلة' ? 1 : 2);
+    return specialists.sort((a, b) => priority(a.fullName) - priority(b.fullName));
   }
 
   async getById(id: string, requester?: AuthenticatedUser) {

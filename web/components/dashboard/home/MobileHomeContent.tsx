@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { fadeUp, staggerContainer } from "@/lib/motion";
 import { MobileHomeHeader } from "./MobileHomeHeader";
 import { WelcomeBanner } from "./WelcomeBanner";
+import { ThousandDaysJourneyBar } from "./ThousandDaysJourneyBar";
 import { ServiceGridTile, type ServiceGridItem } from "./ServiceGridTile";
 import { HomeDoulaCard } from "./HomeDoulaCard";
 import { UrgentHelpCard } from "./UrgentHelpCard";
@@ -37,6 +38,11 @@ export function MobileHomeContent() {
       >
         <WelcomeBanner />
       </motion.div>
+
+      {/* لا توجد "بطاقة مزاج" مستقلة فعليًا في هذه الصفحة (تتبع المزاج مجرد بلاطة واحدة ضمن
+          شبكة "خدماتنا" أدناه) — أقرب موضع مطابق لروح الطلب ("بعد بطاقة تعريفية وقبل شبكة
+          الخدمات") هو مباشرة بعد WelcomeBanner، فوُضع الشريط هنا */}
+      <ThousandDaysJourneyBar />
 
       <h2 className="mx-4 mb-3 mt-6 font-bold text-foreground">خدماتنا</h2>
       <motion.div
