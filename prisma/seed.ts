@@ -2574,6 +2574,60 @@ async function main() {
     }
   }
   console.log(`تم زرع ${SPECIALISTS_SEED.length} أخصائيين معتمدين بفترات توفر ودورات تجريبية عبر المسارات الثلاثة`);
+
+  // فتحات توفر مفتوحة لكل الأخصائيين المعتمدين: كل ساعة من 8 صباحًا حتى 11 مساءً، لمدة سنة.
+  // قيد @@unique([specialistId, startTime]) يمنع فتحتين (remote + in_person) في الساعة نفسها،
+  // فتُجعل 14:00–17:59 حضورية (بولاية الأخصائي) وبقية الساعات عن بُعد.
+  // تُحذف فقط الفتحات غير المحجوزة (isBooked=false وبلا booking) حتى لا تُكسر الحجوزات القائمة.
+  await prisma.specialistAvailability.deleteMany({ where: { isBooked: false, booking: null } });
+
+  const approvedSpecialists = await prisma.specialist.findMany({
+    where: { status: SpecialistStatus.approved },
+    include: { user: { select: { wilaya: true } } },
+  });
+  const slotsNow = new Date();
+  const slotsToday = new Date(slotsNow);
+  slotsToday.setHours(0, 0, 0, 0);
+
+  const slotsToCreate: {
+    specialistId: string;
+    startTime: Date;
+    endTime: Date;
+    consultationType: ConsultationType;
+    wilaya: string | null;
+    isBooked: boolean;
+  }[] = [];
+  for (const sp of approvedSpecialists) {
+    for (let day = 0; day <= 365; day++) {
+      const date = new Date(slotsToday);
+      date.setDate(slotsToday.getDate() + day);
+      for (let hour = 8; hour <= 22; hour++) {
+        const startTime = new Date(date);
+        startTime.setHours(hour, 0, 0, 0);
+        if (startTime <= slotsNow) continue;
+        const endTime = new Date(date);
+        endTime.setHours(hour + 1, 0, 0, 0);
+        const inPerson = hour >= 14 && hour <= 17;
+        slotsToCreate.push({
+          specialistId: sp.id,
+          startTime,
+          endTime,
+          consultationType: inPerson ? ConsultationType.in_person : ConsultationType.remote,
+          wilaya: inPerson ? (sp.user.wilaya ?? 'الجزائر العاصمة') : null,
+          isBooked: false,
+        });
+      }
+    }
+  }
+
+  const chunkSize = 1000;
+  for (let i = 0; i < slotsToCreate.length; i += chunkSize) {
+    await prisma.specialistAvailability.createMany({
+      data: slotsToCreate.slice(i, i + chunkSize),
+      skipDuplicates: true,
+    });
+  }
+  console.log(`تم زرع ${slotsToCreate.length} فتحة توفر مفتوحة لـ ${approvedSpecialists.length} أخصائيين`);
   console.log('بيانات دخول الأخصائيين التجريبيين: 0500000001 (نفسية) / 0500000002 (نفسية) / 0500000003 (نفسية) / 0500000006 (نفسية) / 0500000007 (نفسية) / 0500000004 (صحية) / 0500000005 (غذائية) — كلمة المرور: Specialist@12345');
 
   const adminPasswordHash = await bcrypt.hash('AdminTeam@2026', SALT_ROUNDS);
