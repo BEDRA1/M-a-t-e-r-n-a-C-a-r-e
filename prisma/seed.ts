@@ -2681,13 +2681,14 @@ async function main() {
   }
   console.log(`تم زرع ${SUBSCRIPTION_PLANS_SEED.length} باقات اشتراك`);
 
-  // بداية الأسبوع الحالي بنفس منطق NutritionService.getCurrentWeekStart() تمامًا (الأحد 00:00 UTC)
-  // حتى تظهر الوجبات المزروعة فعليًا في GET /weekly-meals/current-week فور تشغيل الـseed
-  const now = new Date();
-  const currentWeekStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - now.getUTCDay()));
+  // الوجبات لا تُقيَّد بأسبوع (GET /weekly-meals/current-week يرجع الكل)، فتاريخ بعيد حتى لا ينتهي
+  const currentWeekStart = new Date('2030-01-01T00:00:00.000Z');
+  // نقل أي وجبة قديمة لتاريخ 2030 ثم حذف المكرّرات غير المرتبطة بطلبات، حتى لا تظهر الوجبة مرتين
+  await prisma.weeklyMeal.deleteMany({ where: { weekStartDate: { not: currentWeekStart }, orderItems: { none: {} } } });
   for (const meal of WEEKLY_MEALS_SEED) {
     const existing = await prisma.weeklyMeal.findFirst({
-      where: { weekStartDate: currentWeekStart, dayOfWeek: meal.dayOfWeek, mealType: meal.mealType },
+      where: { dayOfWeek: meal.dayOfWeek, mealType: meal.mealType },
+      orderBy: { weekStartDate: 'desc' },
     });
     if (existing) {
       // كان هذا التحديث يُحدّث imageUrl فقط ويترك الاسم/الوصف/السعر القديمة كما هي — لو
@@ -2700,6 +2701,7 @@ async function main() {
           description: meal.description,
           price: meal.price,
           imageUrl: meal.imageUrl,
+          weekStartDate: currentWeekStart,
         },
       });
     } else {
