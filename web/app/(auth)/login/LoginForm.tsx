@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { useLogin } from "@/lib/hooks/useAuth";
 import { ApiError } from "@/lib/api-client";
+import { resolvePostLoginPath } from "@/lib/auth-redirect";
 import { loginSchema, type LoginFormValues } from "@/lib/validation/auth";
 
 export function LoginForm() {
@@ -29,9 +30,7 @@ export function LoginForm() {
     setServerError(null);
     try {
       const { user } = await login.mutateAsync(values);
-      // الإدارة تُوجَّه للوحتها المستقلة افتراضيًا؛ redirect الصريح (مسار محمي سابق) يبقى أولوية
-      const redirect = searchParams.get("redirect") ?? (user.role === "admin" ? "/admin" : "/dashboard");
-      router.push(redirect);
+      router.push(resolvePostLoginPath(user.role, searchParams.get("redirect")));
       router.refresh();
     } catch (err) {
       setServerError(err instanceof ApiError ? err.message : "تعذّر تسجيل الدخول");
