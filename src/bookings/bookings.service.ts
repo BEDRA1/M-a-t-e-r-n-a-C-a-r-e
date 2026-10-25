@@ -128,6 +128,29 @@ export class BookingsService {
     });
   }
 
+  // select صريح يستبعد questionnaireAnswers (إجابات الاستبيان النفسي) وvideoLink — الإدارة لا تحتاجهما في القائمة
+  listAll(status?: BookingStatus) {
+    return this.prisma.booking.findMany({
+      where: status ? { status } : {},
+      select: {
+        id: true,
+        userId: true,
+        specialistId: true,
+        availabilitySlotId: true,
+        consultationType: true,
+        reasonId: true,
+        status: true,
+        paymentMethod: true,
+        paymentStatus: true,
+        createdAt: true,
+        user: { select: { id: true, phone: true } },
+        specialist: { select: { id: true, fullName: true } },
+        availabilitySlot: { select: { id: true, startTime: true, consultationType: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async listForSpecialist(specialistUserId: string, status?: BookingStatus) {
     const specialist = await this.getSpecialistOrThrow(specialistUserId);
     return this.prisma.booking.findMany({

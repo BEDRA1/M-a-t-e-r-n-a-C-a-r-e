@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { UserRole } from '@prisma/client';
 import type { Request } from 'express';
 import { SubscriptionsService } from './subscriptions.service';
 import { SubscribeDto } from './dto/subscribe.dto';
+import { QuerySubscriptionsDto } from './dto/query-subscriptions.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -15,6 +16,15 @@ import type { AuthenticatedUser } from '../auth/types/authenticated-user.type';
 @Controller('api/v1/subscriptions')
 export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
+
+  // GET الجذر لا يتعارض مع 'plans'/'mine' ولا مع POST ':id/cancel'
+  @Get()
+  @Roles(UserRole.admin)
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'كل الاشتراكات مع الباقة والمعاملات (الإدارة فقط)، بفلتر status اختياري' })
+  listAll(@Query() query: QuerySubscriptionsDto) {
+    return this.subscriptionsService.listAll(query.status);
+  }
 
   @Get('plans')
   @ApiOperation({ summary: 'قائمة الباقات الخمس المتاحة' })

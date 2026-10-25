@@ -39,20 +39,17 @@ function adminListQuery<T>(key: string, path: string) {
   };
 }
 
-// TODO(backend): GET /users غير موجود حاليًا في الـBackend — لا يوجد UsersController.
-// الواجهة جاهزة وستعرض البيانات تلقائيًا فور إضافته (admin فقط، مع _count.bookingsMade).
+// GET /users (admin فقط) — src/users: id/phone/role/wilaya/createdAt + _count.bookingsMade، بفلتر ?role= اختياري
 export function useAdminUsers() {
   return useQuery(adminListQuery<AdminUser>("users", "users"));
 }
 
-// TODO(backend): GET /bookings (الجذر) غير موجود — المتاح فقط /bookings/mine و/bookings/for-specialist.
-// المطلوب: قائمة كل الحجوزات للإدارة مع include { user: phone, specialist: fullName, availabilitySlot }.
+// GET /bookings (admin فقط) — مع user.phone وspecialist.fullName وavailabilitySlot.startTime، بفلتر ?status= اختياري
 export function useAdminBookings() {
   return useQuery(adminListQuery<AdminBooking>("bookings", "bookings"));
 }
 
-// TODO(backend): GET /subscriptions (الجذر) غير موجود — المتاح فقط /subscriptions/plans و/subscriptions/mine.
-// المطلوب: كل الاشتراكات للإدارة مع include { user: phone, plan, transactions }.
+// GET /subscriptions (admin فقط) — مع user.phone وplan وtransactions، بفلتر ?status= اختياري
 export function useAdminSubscriptions() {
   return useQuery(adminListQuery<AdminSubscription>("subscriptions", "subscriptions"));
 }

@@ -94,6 +94,21 @@ export class SubscriptionsService {
     });
   }
 
+  async listAll(status?: SubscriptionStatus) {
+    // تحديث المنتهية لكل المستخدمين أولًا، وإلا سيُظهر فلتر active اشتراكات انتهت فعلًا
+    await this.expireStaleSubscriptions();
+    return this.prisma.userSubscription.findMany({
+      where: status ? { status } : {},
+      include: {
+        user: { select: { id: true, phone: true } },
+        plan: { select: { id: true, code: true, nameAr: true, price: true, currency: true } },
+        // paymentProviderRef مستبعد عمدًا — مرجع المعاملة لدى مزوّد الدفع لا حاجة للإدارة به هنا
+        transactions: { select: { id: true, amount: true, paymentMethod: true, status: true, createdAt: true } },
+      },
+      orderBy: { startedAt: 'desc' },
+    });
+  }
+
   async cancel(userId: string, id: string) {
     const subscription = await this.prisma.userSubscription.findUnique({ where: { id } });
     if (!subscription || subscription.userId !== userId) {
@@ -115,9 +130,10 @@ export class SubscriptionsService {
   }
 
   /** تحديث كسول: أي اشتراك نشط تجاوز تاريخ انتهائه يُصبح expired عند أول قراءة له بدل الاعتماد على مهمة مجدولة */
-  private async expireStaleSubscriptions(userId: string) {
+  /** بلا userId = كل المستخدمين (قائمة الإدارة) */
+  private async expireStaleSubscriptions(userId?: string) {
     await this.prisma.userSubscription.updateMany({
-      where: { userId, status: SubscriptionStatus.active, expiresAt: { lt: new Date() } },
+      where: { ...(userId ? { userId } : {}), status: SubscriptionStatus.active, expiresAt: { lt: new Date() } },
       data: { status: SubscriptionStatus.expired },
     });
   }

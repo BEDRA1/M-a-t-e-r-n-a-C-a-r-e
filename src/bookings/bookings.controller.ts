@@ -27,6 +27,15 @@ export class BookingsController {
     return this.bookingsService.create(user.userId, dto);
   }
 
+  // GET الجذر لا يتعارض مع ':id' (يتطلب مقطعًا إضافيًا) ولا مع 'mine'/'for-specialist'
+  @Get()
+  @Roles(UserRole.admin)
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'كل الحجوزات (الإدارة فقط)، بفلتر status اختياري' })
+  listAll(@Query() query: QuerySpecialistBookingsDto) {
+    return this.bookingsService.listAll(query.status);
+  }
+
   @Get('mine')
   @Roles(UserRole.mother, UserRole.spouse)
   @UseGuards(RolesGuard)

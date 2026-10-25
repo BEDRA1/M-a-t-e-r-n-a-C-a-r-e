@@ -34,6 +34,7 @@ import { ArticlesModule } from './articles/articles.module';
 import { DataSharingModule } from './data-sharing/data-sharing.module';
 import { SpecialistPatientsModule } from './specialist-patients/specialist-patients.module';
 import { AuditLogModule } from './audit-log/audit-log.module';
+import { UsersModule } from './users/users.module';
 import { AuditLogInterceptor } from './audit-log/interceptors/audit-log.interceptor';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -75,6 +76,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     DataSharingModule,
     SpecialistPatientsModule,
     AuditLogModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [
