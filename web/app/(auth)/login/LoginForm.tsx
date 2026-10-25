@@ -28,8 +28,9 @@ export function LoginForm() {
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
     try {
-      await login.mutateAsync(values);
-      const redirect = searchParams.get("redirect") ?? "/dashboard";
+      const { user } = await login.mutateAsync(values);
+      // الإدارة تُوجَّه للوحتها المستقلة افتراضيًا؛ redirect الصريح (مسار محمي سابق) يبقى أولوية
+      const redirect = searchParams.get("redirect") ?? (user.role === "admin" ? "/admin" : "/dashboard");
       router.push(redirect);
       router.refresh();
     } catch (err) {
