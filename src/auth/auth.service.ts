@@ -71,6 +71,14 @@ export class AuthService {
       });
     }
 
+    // بعد التحقق من كلمة المرور عمدًا — لا يكشف أن الحساب موجود ومعطّل لمن لا يعرف كلمته
+    if (!user.isActive) {
+      throw new AppException(HttpStatus.FORBIDDEN, {
+        ar: 'هذا الحساب معطّل، يرجى التواصل مع الإدارة',
+        en: 'This account has been disabled, please contact support',
+      });
+    }
+
     const tokens = await this.issueTokenPair(user.id, user.phone, user.role);
     return { user: this.toSafeUser(user), ...tokens };
   }
@@ -118,10 +126,10 @@ export class AuthService {
     });
 
     const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
-    if (!user) {
+    if (!user || !user.isActive) {
       throw new AppException(HttpStatus.UNAUTHORIZED, {
-        ar: 'المستخدم غير موجود',
-        en: 'User not found',
+        ar: 'المستخدم غير موجود أو الحساب معطّل',
+        en: 'User not found or account disabled',
       });
     }
 

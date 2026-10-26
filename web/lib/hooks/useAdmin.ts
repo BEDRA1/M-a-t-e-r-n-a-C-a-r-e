@@ -1,10 +1,22 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ApiError, apiGet, apiPatch } from "../api-client";
+import { ApiError, apiGet, apiPatch, apiPost } from "../api-client";
 import type {
   AdminTestimonial,
   Booking,
+  BookingStatus,
+  ConsultationType,
+  MealOrderStatus,
+  PaymentStatus,
+  ProductOrderStatus,
+  ServiceBookingStatus,
+  SpecialistStatus,
+  SpecialistTrack,
+  SubscriptionPaymentMethod,
+  SubscriptionStatus,
+  TransactionStatus,
+  UserRole,
   MealOrder,
   ProductOrder,
   ServiceBooking,
@@ -218,6 +230,113 @@ export function useCancelBooking() {
     mutationFn: (id: string) => apiPatch<Booking>(`bookings/${id}/status`, { status: "cancelled" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "bookings"] });
+    },
+  });
+}
+
+// ── إدارة المستخدمين ────────────────────────────────────────────────────────
+
+/** تفاصيل مستخدم كما يُرجعها GET /users/:id — بلا أي بيانات طبية (تقييمات، مزاج، ملاحظات كلينيكية) */
+export interface AdminUserDetails extends User {
+  isActive: boolean;
+  specialistProfile: {
+    id: string;
+    fullName: string;
+    specialty: string;
+    track: SpecialistTrack;
+    status: SpecialistStatus;
+    yearsExperience: number;
+  } | null;
+  bookingsMade: {
+    id: string;
+    status: BookingStatus;
+    consultationType: ConsultationType;
+    paymentStatus: PaymentStatus;
+    createdAt: string;
+    specialist: { id: string; fullName: string };
+    availabilitySlot: { startTime: string };
+  }[];
+  subscriptions: {
+    id: string;
+    status: SubscriptionStatus;
+    startedAt: string;
+    expiresAt: string | null;
+    bookingCreditsRemaining: number;
+    courseCreditsRemaining: number;
+    plan: { id: string; code: string; nameAr: string; price: number };
+    transactions: { id: string; amount: number; paymentMethod: SubscriptionPaymentMethod; status: TransactionStatus; createdAt: string }[];
+  }[];
+  mealOrders: { id: string; status: MealOrderStatus; totalPrice: number; preferredTime: string; createdAt: string }[];
+  productOrders: { id: string; status: ProductOrderStatus; totalPrice: number; createdAt: string }[];
+  serviceBookings: { id: string; status: ServiceBookingStatus; scheduledTime: string; createdAt: string; service: { name: string } }[];
+}
+
+export function useAdminUserDetails(id: string) {
+  return useQuery({
+    queryKey: ["admin", "users", id],
+    queryFn: () => apiGet<AdminUserDetails>(`users/${id}`),
+  });
+}
+
+function useInvalidateUser() {
+  const queryClient = useQueryClient();
+  return (id?: string) => {
+    queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+    if (id) queryClient.invalidateQueries({ queryKey: ["admin", "users", id] });
+  };
+}
+
+export function useSetUserActive() {
+  const invalidate = useInvalidateUser();
+  return useMutation({
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => apiPatch<User>(`users/${id}/active`, { isActive }),
+    onSuccess: (_data, vars) => invalidate(vars.id),
+  });
+}
+
+export function useChangeUserRole() {
+  const invalidate = useInvalidateUser();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, role }: { id: string; role: UserRole }) => apiPatch<User>(`users/${id}/role`, { role }),
+    onSuccess: (_data, vars) => {
+      invalidate(vars.id);
+      // خفض أخصائية لدور آخر يرفض ملفها تلقائيًا في الـBackend
+      queryClient.invalidateQueries({ queryKey: ["admin", "specialists"] });
+    },
+  });
+}
+
+export interface CreateSpecialistAccountInput {
+  fullName: string;
+  phone: string;
+  specialty: string;
+  track: SpecialistTrack;
+  wilaya?: string;
+  password: string;
+}
+
+export function useCreateSpecialistAccount() {
+  const invalidate = useInvalidateUser();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateSpecialistAccountInput) => apiPost<User>("users/specialists", input),
+    onSuccess: () => {
+      invalidate();
+      queryClient.invalidateQueries({ queryKey: ["admin", "specialists"] });
+    },
+  });
+}
+
+export function useGrantSubscription() {
+  const invalidate = useInvalidateUser();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { userId: string; planCode: string; reference?: string }) =>
+      apiPost<UserSubscription>("subscriptions/grant", input),
+    onSuccess: (_data, vars) => {
+      invalidate(vars.userId);
+      queryClient.invalidateQueries({ queryKey: ["admin", "subscriptions"] });
     },
   });
 }

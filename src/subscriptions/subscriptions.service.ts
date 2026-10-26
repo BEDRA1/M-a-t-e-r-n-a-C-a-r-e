@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { SubscriptionStatus, TransactionStatus } from '@prisma/client';
+import { SubscriptionPaymentMethod, SubscriptionStatus, TransactionStatus, UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AppException } from '../common/exceptions/app.exception';
 import { PAYMENT_PROVIDER, type PaymentProvider } from '../payments/payment.provider';
@@ -91,6 +91,61 @@ export class SubscriptionsService {
       where: { userId },
       include: { plan: true, transactions: true },
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /** منح يدوي من الإدارة (دفع نقدًا/CCP خارج المنصة) — نفس بنية subscribe() بلا مزوّد دفع، ومعاملته بطريقة manual */
+  async grantManual(adminUserId: string, userId: string, planCode: string, reference?: string) {
+    const [plan, user] = await Promise.all([
+      this.prisma.subscriptionPlan.findUnique({ where: { code: planCode } }),
+      this.prisma.user.findUnique({ where: { id: userId }, select: { id: true, role: true } }),
+    ]);
+    if (!plan) {
+      throw new AppException(HttpStatus.NOT_FOUND, { ar: 'الباقة غير موجودة', en: 'Plan not found' });
+    }
+    if (!user) {
+      throw new AppException(HttpStatus.NOT_FOUND, { ar: 'المستخدم غير موجود', en: 'User not found' });
+    }
+    // نفس من يُسمح لهم بالاشتراك ذاتيًا (@Roles(mother, spouse) على subscribe)
+    if (user.role !== UserRole.mother && user.role !== UserRole.spouse) {
+      throw new AppException(HttpStatus.BAD_REQUEST, {
+        ar: 'الاشتراكات متاحة للأمهات والأزواج فقط',
+        en: 'Subscriptions are only available to mothers and spouses',
+      });
+    }
+
+    const startedAt = new Date();
+    const expiresAt = plan.type === 'monthly' ? new Date(startedAt.getTime() + MONTHLY_DURATION_MS) : null;
+
+    return this.prisma.$transaction(async (tx) => {
+      const subscription = await tx.userSubscription.create({
+        data: {
+          userId,
+          planId: plan.id,
+          status: SubscriptionStatus.active,
+          startedAt,
+          expiresAt,
+          bookingCreditsRemaining: plan.bookingCredits,
+          courseCreditsRemaining: plan.courseCredits,
+        },
+      });
+      await tx.subscriptionTransaction.create({
+        data: {
+          userSubscriptionId: subscription.id,
+          amount: plan.price,
+          paymentMethod: SubscriptionPaymentMethod.manual,
+          // من منح الاشتراك ومرجع الوصل إن وُجد — يُكمّله سجل النشاط (grant_subscription)
+          paymentProviderRef: `manual:${adminUserId}${reference ? `:${reference}` : ''}`,
+          status: TransactionStatus.succeeded,
+        },
+      });
+      return tx.userSubscription.findUniqueOrThrow({
+        where: { id: subscription.id },
+        include: {
+          plan: { select: { id: true, code: true, nameAr: true, price: true } },
+          transactions: { select: { id: true, amount: true, paymentMethod: true, status: true, createdAt: true } },
+        },
+      });
     });
   }
 

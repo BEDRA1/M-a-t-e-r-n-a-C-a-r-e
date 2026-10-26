@@ -6,6 +6,8 @@ export interface User {
   email: string | null;
   role: UserRole;
   wilaya: string | null;
+  /** غائب في استجابات لا تختاره (auth/me مثلًا قبل الـmigration) — يُعامَل الغياب كـtrue */
+  isActive?: boolean;
   createdAt: string;
 }
 
@@ -442,7 +444,8 @@ export interface ProductOrder {
 
 export type SubscriptionType = "monthly" | "one_time";
 export type SubscriptionStatus = "active" | "expired" | "cancelled";
-export type SubscriptionPaymentMethod = "visa" | "baridimob";
+// manual = منح يدوي من الإدارة فقط — لا تختاره المستخدمة (الـBackend يرفضه في subscribe)
+export type SubscriptionPaymentMethod = "visa" | "baridimob" | "manual";
 export type TransactionStatus = "pending" | "succeeded" | "failed";
 
 export interface SubscriptionPlan {

@@ -128,6 +128,8 @@ enum SubscriptionStatus {
 enum SubscriptionPaymentMethod {
   visa
   baridimob
+  // منح يدوي من الإدارة (دفع نقدًا أو CCP خارج المنصة) — لا يمر عبر مزوّد الدفع
+  manual
 }
 
 // اسم مختلف عمدًا عن PaymentStatus الموجود أعلاه لنفس السبب — خاص بحالة معاملة دفع الاشتراك.
@@ -150,6 +152,8 @@ model User {
   role         UserRole
   wilaya       String?
   dateOfBirth  DateTime? @map("date_of_birth")
+  // تعطيل بدل الحذف — الحساب المعطّل لا يدخل ولا يُجدِّد جلسته، وسجلاته (حجوزات، طلبات) تبقى سليمة
+  isActive     Boolean  @default(true) @map("is_active")
   createdAt    DateTime @default(now()) @map("created_at")
 
   motherOfFamily Family?        @relation("MotherFamily")

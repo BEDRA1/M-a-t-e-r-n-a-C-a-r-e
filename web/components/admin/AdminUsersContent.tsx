@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import Link from "next/link";
+import { Search, UserPlus } from "lucide-react";
 import {
+  AdminButton,
   AdminPageHeader,
   AdminPanel,
   AdminTable,
@@ -16,6 +18,7 @@ import {
 } from "@/components/admin/AdminUi";
 import { isMissingEndpoint, useAdminBookings, useAdminUsers, userBookingsCount } from "@/lib/hooks/useAdmin";
 import { formatArabicDate, maskPhone, userRoleLabel } from "@/lib/format";
+import { CreateSpecialistDialog } from "@/components/admin/users/CreateSpecialistDialog";
 import type { UserRole } from "@/lib/types";
 
 type RoleFilter = "all" | UserRole;
@@ -28,7 +31,7 @@ const ROLE_OPTIONS: { value: RoleFilter; label: string }[] = [
   { value: "admin", label: "admin" },
 ];
 
-const HEAD = ["الهاتف", "الدور", "تاريخ التسجيل", "الولاية", "عدد الحجوزات"];
+const HEAD = ["الهاتف", "الدور", "الحالة", "تاريخ التسجيل", "الولاية", "عدد الحجوزات"];
 
 export function AdminUsersContent() {
   const users = useAdminUsers();
@@ -36,6 +39,7 @@ export function AdminUsersContent() {
   const bookings = useAdminBookings();
   const [role, setRole] = useState<RoleFilter>("all");
   const [search, setSearch] = useState("");
+  const [creating, setCreating] = useState(false);
 
   const bookingsByUser = useMemo(() => {
     const map = new Map<string, number>();
@@ -56,10 +60,16 @@ export function AdminUsersContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <AdminPageHeader
-        title="المستخدمون"
-        description={users.data ? `${users.data.length.toLocaleString("ar-DZ")} مستخدم مسجل` : "إدارة حسابات المنصة"}
-      />
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <AdminPageHeader
+          title="المستخدمون"
+          description={users.data ? `${users.data.length.toLocaleString("ar-DZ")} مستخدم مسجل` : "إدارة حسابات المنصة"}
+        />
+        <AdminButton tone="positive" className="h-9" onClick={() => setCreating(true)}>
+          <UserPlus className="size-4" />
+          إنشاء حساب أخصائية
+        </AdminButton>
+      </div>
 
       <AdminPanel>
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -94,10 +104,18 @@ export function AdminUsersContent() {
                 return (
                   <tr key={u.id} className="hover:bg-slate-800/40">
                     <td className="px-3 py-3 font-mono tabular-nums" dir="ltr">
-                      {maskPhone(u.phone)}
+                      <Link href={`/admin/users/${u.id}`} className="font-semibold text-slate-100 underline-offset-4 hover:underline">
+                        {maskPhone(u.phone)}
+                      </Link>
                     </td>
                     <td className="px-3 py-3">
                       <StatusPill tone={u.role === "admin" ? "warning" : "neutral"}>{userRoleLabel(u.role)}</StatusPill>
+                    </td>
+                    <td className="px-3 py-3">
+                      {/* غياب الحقل (Backend أقدم) يُعامَل كنشط */}
+                      <StatusPill tone={u.isActive === false ? "alert" : "positive"}>
+                        {u.isActive === false ? "معطّل" : "نشط"}
+                      </StatusPill>
                     </td>
                     <td className="px-3 py-3 text-slate-300">{formatArabicDate(u.createdAt)}</td>
                     <td className="px-3 py-3 text-slate-300">{u.wilaya || "—"}</td>
@@ -109,6 +127,8 @@ export function AdminUsersContent() {
           </AdminTable>
         )}
       </AdminPanel>
+
+      <CreateSpecialistDialog open={creating} onClose={() => setCreating(false)} />
     </div>
   );
 }

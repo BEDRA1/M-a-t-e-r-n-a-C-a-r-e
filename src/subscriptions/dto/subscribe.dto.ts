@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { SubscriptionPaymentMethod } from '@prisma/client';
-import { IsEnum, IsObject, IsString, MinLength } from 'class-validator';
+import { IsIn, IsObject, IsString, MinLength } from 'class-validator';
 
 export class SubscribeDto {
   @ApiProperty({ example: 'premium', description: 'كود الباقة (basic/premium/royal/postpartum/couples)' })
@@ -8,9 +8,11 @@ export class SubscribeDto {
   @MinLength(1)
   planCode: string;
 
-  @ApiProperty({ enum: SubscriptionPaymentMethod })
-  @IsEnum(SubscriptionPaymentMethod, { message: 'طريقة الدفع غير صالحة' })
-  paymentMethod: SubscriptionPaymentMethod;
+  // قائمة صريحة لا IsEnum: SubscriptionPaymentMethod يضم manual (منح الإدارة) الذي لا يجوز
+  // أن تختاره المستخدمة بنفسها — وإلا لتجاوزت الدفع كليًا
+  @ApiProperty({ enum: [SubscriptionPaymentMethod.visa, SubscriptionPaymentMethod.baridimob] })
+  @IsIn([SubscriptionPaymentMethod.visa, SubscriptionPaymentMethod.baridimob], { message: 'طريقة الدفع غير صالحة' })
+  paymentMethod: 'visa' | 'baridimob';
 
   @ApiProperty({
     description:

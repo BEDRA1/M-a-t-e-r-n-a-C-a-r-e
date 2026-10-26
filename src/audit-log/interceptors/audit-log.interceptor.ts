@@ -10,6 +10,15 @@ interface EntityLike {
   id?: string;
 }
 
+// الجسم كاملًا يُخزَّن في details — هذه المفاتيح لا تُخزَّن أبدًا (كلمة مرور مؤقتة لحساب جديد مثلًا)
+const REDACTED_KEYS = new Set(['password', 'newPassword', 'currentPassword', 'paymentData', 'refreshToken']);
+
+function redact(body: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(body).map(([k, v]) => [k, REDACTED_KEYS.has(k) ? '[REDACTED]' : v]),
+  );
+}
+
 // interceptor عام مُسجَّل مرة واحدة على مستوى التطبيق (APP_INTERCEPTOR) — لا يفعل شيئًا
 // لأي مسار غير موسوم بـ@AuditLog()، فتكلفته على بقية الـendpoints قراءة metadata فقط
 @Injectable()
@@ -38,7 +47,7 @@ export class AuditLogInterceptor implements NestInterceptor {
     const paramEntityId = params?.id ?? params?.userId ?? params?.specialistId ?? null;
     const ip = request.ip ?? request.socket?.remoteAddress ?? null;
     const body = request.body as Record<string, unknown> | undefined;
-    const baseDetails = { ...(body && Object.keys(body).length > 0 ? body : {}), ip };
+    const baseDetails = { ...(body && Object.keys(body).length > 0 ? redact(body) : {}), ip };
 
     return next.handle().pipe(
       tap((result: unknown) => {

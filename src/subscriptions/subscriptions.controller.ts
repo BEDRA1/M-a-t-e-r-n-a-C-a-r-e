@@ -6,6 +6,8 @@ import type { Request } from 'express';
 import { SubscriptionsService } from './subscriptions.service';
 import { SubscribeDto } from './dto/subscribe.dto';
 import { QuerySubscriptionsDto } from './dto/query-subscriptions.dto';
+import { GrantSubscriptionDto } from './dto/grant-subscription.dto';
+import { AuditLog } from '../audit-log/decorators/audit-log.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -24,6 +26,15 @@ export class SubscriptionsController {
   @ApiOperation({ summary: 'كل الاشتراكات مع الباقة والمعاملات (الإدارة فقط)، بفلتر status اختياري' })
   listAll(@Query() query: QuerySubscriptionsDto) {
     return this.subscriptionsService.listAll(query.status);
+  }
+
+  @Post('grant')
+  @Roles(UserRole.admin)
+  @UseGuards(RolesGuard)
+  @AuditLog('grant_subscription', 'subscription')
+  @ApiOperation({ summary: 'منح اشتراك يدويًا لمستخدم (دفع نقدًا/CCP) — الإدارة فقط، معاملة بطريقة manual' })
+  grant(@CurrentUser() admin: AuthenticatedUser, @Body() dto: GrantSubscriptionDto) {
+    return this.subscriptionsService.grantManual(admin.userId, dto.userId, dto.planCode, dto.reference);
   }
 
   @Get('plans')
