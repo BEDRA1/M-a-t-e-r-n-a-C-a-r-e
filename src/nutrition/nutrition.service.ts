@@ -21,7 +21,7 @@ export class NutritionService {
 
   async getCurrentWeekMeals() {
     // بدون فلتر على الأسبوع: تظهر الوجبات دائمًا مهما كان weekStartDate
-    const meals = await this.prisma.weeklyMeal.findMany();
+    const meals = await this.prisma.weeklyMeal.findMany({ where: { isActive: true } });
     return meals.sort((a, b) => {
       if (a.dayOfWeek !== b.dayOfWeek) return a.dayOfWeek - b.dayOfWeek;
       return MEAL_TYPE_ORDER[a.mealType] - MEAL_TYPE_ORDER[b.mealType];
@@ -30,7 +30,7 @@ export class NutritionService {
 
   async createOrder(userId: string, dto: CreateMealOrderDto) {
     const mealIds = [...new Set(dto.items.map((item) => item.mealId))];
-    const meals = await this.prisma.weeklyMeal.findMany({ where: { id: { in: mealIds } } });
+    const meals = await this.prisma.weeklyMeal.findMany({ where: { id: { in: mealIds }, isActive: true } });
     if (meals.length !== mealIds.length) {
       throw new AppException(HttpStatus.NOT_FOUND, {
         ar: 'إحدى الوجبات المطلوبة غير موجودة',

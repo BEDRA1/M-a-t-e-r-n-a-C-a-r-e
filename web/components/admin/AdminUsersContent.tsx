@@ -1,5 +1,6 @@
 "use client";
 
+import { ExportCsvButton } from "@/components/admin/ExportCsvButton";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, UserPlus } from "lucide-react";
@@ -65,10 +66,13 @@ export function AdminUsersContent() {
           title="المستخدمون"
           description={users.data ? `${users.data.length.toLocaleString("ar-DZ")} مستخدم مسجل` : "إدارة حسابات المنصة"}
         />
-        <AdminButton tone="positive" className="h-9" onClick={() => setCreating(true)}>
-          <UserPlus className="size-4" />
-          إنشاء حساب أخصائية
-        </AdminButton>
+        <div className="flex flex-wrap items-start gap-2">
+          <ExportCsvButton kind="users" />
+          <AdminButton tone="positive" className="h-9" onClick={() => setCreating(true)}>
+            <UserPlus className="size-4" />
+            إنشاء حساب أخصائية
+          </AdminButton>
+        </div>
       </div>
 
       <AdminPanel>

@@ -17,6 +17,12 @@ import { ApiError } from "@/lib/api-client";
 import { useCancelSubscription } from "@/lib/hooks/useSubscriptions";
 import type { UserSubscription } from "@/lib/types";
 
+/** ما دُفع فعلًا عند الاشتراك — سعر الباقة الحالي قد يتغيّر لاحقًا من الإدارة */
+function paidAmount(subscription: UserSubscription): number {
+  const paid = subscription.transactions?.filter((t) => t.status === "succeeded") ?? [];
+  return paid.length > 0 ? paid.reduce((sum, t) => sum + t.amount, 0) : subscription.plan.price;
+}
+
 export function CurrentSubscriptionCard({ subscription }: { subscription: UserSubscription }) {
   const [confirmingCancel, setConfirmingCancel] = useState(false);
   const cancelSubscription = useCancelSubscription();
@@ -38,7 +44,7 @@ export function CurrentSubscriptionCard({ subscription }: { subscription: UserSu
           </span>
           <div>
             <p className="font-extrabold text-foreground">باقة {subscription.plan.nameAr}</p>
-            <p className="text-sm text-muted">{formatDzd(subscription.plan.price)}</p>
+            <p className="text-sm text-muted">{formatDzd(paidAmount(subscription))}</p>
           </div>
         </div>
         <Badge tone={subscriptionStatusBadgeTone(subscription.status)}>

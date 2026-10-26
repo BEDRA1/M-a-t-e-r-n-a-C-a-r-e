@@ -56,6 +56,10 @@ export class ArticlesService {
     return { ...article, relatedArticles };
   }
 
+  listAllForAdmin() {
+    return this.prisma.article.findMany({ orderBy: [{ isPublished: 'asc' }, { updatedAt: 'desc' }] });
+  }
+
   async create(dto: CreateArticleDto) {
     await this.assertSlugAvailable(dto.slug);
     return this.prisma.article.create({

@@ -13,7 +13,7 @@ export class DailyTipsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getToday() {
-    const tips = await this.prisma.dailyTip.findMany({ orderBy: { tipNumber: 'asc' } });
+    const tips = await this.prisma.dailyTip.findMany({ where: { isActive: true }, orderBy: { tipNumber: 'asc' } });
     if (tips.length === 0) {
       throw new AppException(HttpStatus.NOT_FOUND, {
         ar: 'لا تتوفر نصائح حاليًا',

@@ -36,6 +36,14 @@ export class ArticlesController {
 export class AdminArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}
 
+  @Get()
+  @Roles(UserRole.admin)
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'كل المقالات (منشورة ومسودات) — للأدمن' })
+  listAll() {
+    return this.articlesService.listAllForAdmin();
+  }
+
   @Post()
   @Roles(UserRole.admin)
   @UseGuards(RolesGuard)

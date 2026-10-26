@@ -1,5 +1,6 @@
 "use client";
 
+import { ExportCsvButton } from "@/components/admin/ExportCsvButton";
 import { useState } from "react";
 import { CheckCircle2, Receipt, Wallet } from "lucide-react";
 import {
@@ -50,7 +51,10 @@ export function AdminSubscriptionsContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <AdminPageHeader title="الاشتراكات والمدفوعات" description="كل اشتراكات الباقات وإيراداتها" />
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <AdminPageHeader title="الاشتراكات والمدفوعات" description="كل اشتراكات الباقات وإيراداتها" />
+        <ExportCsvButton kind="subscriptions" />
+      </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard

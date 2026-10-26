@@ -56,10 +56,10 @@ export const specialistPanelChild: DashboardNavChild = {
 };
 
 /** يظهر فقط لدور admin — يُضاف ديناميكيًا عبر getDashboardNavItems، ومُصدَّر لنفس سبب
- * specialistPanelChild أعلاه */
+ * specialistPanelChild أعلاه. سجل النشاط انتقل إلى /admin/audit-logs داخل لوحة الإدارة */
 export const adminAuditLogItem: DashboardNavItem = {
-  href: "/dashboard/admin/audit-logs",
-  label: "سجل النشاط الإداري",
+  href: "/admin",
+  label: "لوحة الإدارة",
   icon: ShieldCheck,
 };
 

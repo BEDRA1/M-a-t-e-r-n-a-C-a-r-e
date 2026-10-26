@@ -96,7 +96,7 @@ export function CourseDetailContent({ courseId }: { courseId: string }) {
         <div className="relative aspect-video w-full sm:aspect-[21/9]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={courseCoverImage(track)}
+            src={data.imageUrl || courseCoverImage(track)}
             alt={data.title}
             className="size-full rounded-t-xl object-cover"
           />

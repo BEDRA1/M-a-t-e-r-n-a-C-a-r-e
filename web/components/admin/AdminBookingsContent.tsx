@@ -1,5 +1,6 @@
 "use client";
 
+import { ExportCsvButton } from "@/components/admin/ExportCsvButton";
 import { useState } from "react";
 import {
   AdminButton,
@@ -56,10 +57,13 @@ export function AdminBookingsContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <AdminPageHeader
-        title="الحجوزات"
-        description={bookings.data ? `${bookings.data.length.toLocaleString("ar-DZ")} حجز` : "كل حجوزات الاستشارات"}
-      />
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <AdminPageHeader
+          title="الحجوزات"
+          description={bookings.data ? `${bookings.data.length.toLocaleString("ar-DZ")} حجز` : "كل حجوزات الاستشارات"}
+        />
+        <ExportCsvButton kind="bookings" />
+      </div>
 
       {cancelBooking.error && <ErrorNotice message={cancelBooking.error.message} />}
 

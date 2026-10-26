@@ -20,6 +20,7 @@ export class StoreService {
   listProducts(filters: { category?: string; inStockOnly?: boolean }) {
     return this.prisma.product.findMany({
       where: {
+        isActive: true,
         ...(filters.category ? { category: filters.category } : {}),
         ...(filters.inStockOnly ? { stockQuantity: { gt: 0 } } : {}),
       },
@@ -29,7 +30,7 @@ export class StoreService {
 
   async findProduct(id: string) {
     const product = await this.prisma.product.findUnique({ where: { id } });
-    if (!product) {
+    if (!product || !product.isActive) {
       throw new AppException(HttpStatus.NOT_FOUND, { ar: 'المنتج غير موجود', en: 'Product not found' });
     }
     return product;
@@ -37,7 +38,7 @@ export class StoreService {
 
   async createOrder(userId: string, dto: CreateProductOrderDto) {
     const productIds = [...new Set(dto.items.map((item) => item.productId))];
-    const products = await this.prisma.product.findMany({ where: { id: { in: productIds } } });
+    const products = await this.prisma.product.findMany({ where: { id: { in: productIds }, isActive: true } });
     if (products.length !== productIds.length) {
       throw new AppException(HttpStatus.NOT_FOUND, {
         ar: 'أحد المنتجات المطلوبة غير موجود',

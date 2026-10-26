@@ -82,7 +82,8 @@ export type NotificationType =
   | "appointment_reminder"
   | "general"
   | "vaccination_reminder"
-  | "daily_tip";
+  | "daily_tip"
+  | "broadcast";
 
 export interface Notification {
   id: string;
@@ -467,7 +468,8 @@ export interface SubscriptionTransaction {
   userSubscriptionId: string;
   amount: number;
   paymentMethod: SubscriptionPaymentMethod;
-  paymentProviderRef: string;
+  // لا يُرسله الـBackend للمستخدمة (قد يحمل معرّف الأدمن في المنح اليدوي)
+  paymentProviderRef?: string;
   status: TransactionStatus;
   createdAt: string;
 }
@@ -486,6 +488,7 @@ export interface Course {
   price: number;
   contentUrl: string | null;
   wilaya: string | null;
+  imageUrl?: string | null;
   specialist?: { id: string; fullName: string; specialty: string; track?: SpecialistTrack };
 }
 

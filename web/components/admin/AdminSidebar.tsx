@@ -5,8 +5,18 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   ArrowRight,
+  BadgeDollarSign,
+  BookOpen,
   Calendar,
   CreditCard,
+  FileSpreadsheet,
+  GraduationCap,
+  History,
+  Lightbulb,
+  Megaphone,
+  MessagesSquare,
+  Package,
+  Salad,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -35,6 +45,22 @@ const NAV_ITEMS = [
   { href: "/admin/testimonials", label: "الآراء", icon: MessageSquareQuote },
 ];
 
+const CONTENT_ITEMS = [
+  { href: "/admin/articles", label: "المقالات", icon: BookOpen },
+  { href: "/admin/faq", label: "أسئلة الدولا", icon: MessagesSquare },
+  { href: "/admin/meals", label: "قائمة الوجبات", icon: Salad },
+  { href: "/admin/courses", label: "الدورات", icon: GraduationCap },
+  { href: "/admin/products", label: "منتجات المتجر", icon: Package },
+  { href: "/admin/daily-tips", label: "النصائح اليومية", icon: Lightbulb },
+];
+
+const TOOLS_ITEMS = [
+  { href: "/admin/broadcast", label: "إشعار جماعي", icon: Megaphone },
+  { href: "/admin/reports", label: "التقارير", icon: FileSpreadsheet },
+  { href: "/admin/pricing", label: "الأسعار", icon: BadgeDollarSign },
+  { href: "/admin/audit-logs", label: "سجل النشاط", icon: History },
+];
+
 const ORDER_ITEMS: { href: string; label: string; icon: typeof ShoppingBag; countKey: keyof AdminOrderCounts }[] = [
   { href: "/admin/meal-orders", label: "الوجبات", icon: UtensilsCrossed, countKey: "mealOrders" },
   { href: "/admin/product-orders", label: "المتجر", icon: ShoppingBag, countKey: "productOrders" },
@@ -55,7 +81,7 @@ function isActive(pathname: string, href: string): boolean {
   return href === "/admin" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** العودة للموقع حسب الدور — الأدمن يستخدم /dashboard (حيث سجل النشاط الإداري) */
+/** العودة للموقع حسب الدور — الأدمن يعود إلى /dashboard */
 function siteHomeFor(user: User): string {
   return user.role === "specialist" ? "/specialist" : "/dashboard";
 }
@@ -124,6 +150,29 @@ function SidebarBody({ user, onNavigate }: { user: User; onNavigate?: () => void
             </Link>
           );
         })}
+
+        {[
+          { title: "المحتوى", items: CONTENT_ITEMS },
+          { title: "التواصل والتقارير", items: TOOLS_ITEMS },
+        ].map((section) => (
+          <div key={section.title} className="flex flex-col gap-1">
+            <p className="mt-4 px-3 pb-1 text-xs font-semibold text-slate-500">{section.title}</p>
+            {section.items.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onNavigate}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors",
+                  isActive(pathname, item.href) ? "bg-slate-100 text-slate-900" : "text-slate-300 hover:bg-slate-700/50 hover:text-white",
+                )}
+              >
+                <item.icon className="size-[18px]" strokeWidth={2} />
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        ))}
 
         <div className="my-3 border-t border-slate-700/60" />
 

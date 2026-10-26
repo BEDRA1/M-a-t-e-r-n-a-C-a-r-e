@@ -78,6 +78,7 @@ enum NotificationType {
   general
   vaccination_reminder
   daily_tip
+  broadcast
 }
 
 enum SpecialistStatus {
@@ -375,6 +376,8 @@ model DailyTip {
   id        String @id @default(uuid())
   tipNumber Int    @unique @map("tip_number")
   tipTextAr String @map("tip_text_ar")
+  // إخفاء بدل الحذف — النصيحة المخفية تخرج من التناوب اليومي
+  isActive  Boolean @default(true) @map("is_active")
 
   @@map("daily_tips")
 }
@@ -507,6 +510,8 @@ model Booking {
   videoLink            String?          @map("video_link")
   paymentMethod        PaymentMethod?   @map("payment_method")
   paymentStatus        PaymentStatus    @default(pending) @map("payment_status")
+  // لقطة من سعر الاستشارة وقت الحجز — تعديل service_pricing لاحقًا لا يغيّر ما يُستحق على حجز قائم
+  price                Int?
   createdAt            DateTime         @default(now()) @map("created_at")
 
   user             User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -749,6 +754,7 @@ model Course {
   contentUrl   String?          @map("content_url")
   // للحضوري فقط
   wilaya       String?
+  imageUrl     String?          @map("image_url")
   createdAt    DateTime         @default(now()) @map("created_at")
 
   specialist  Specialist         @relation(fields: [specialistId], references: [id])
@@ -806,6 +812,8 @@ model WeeklyMeal {
   description String
   price       Int
   imageUrl    String?  @map("image_url")
+  // إخفاء بدل الحذف — الوجبة المخفية لا تظهر ولا تُطلب، وطلباتها السابقة تبقى سليمة
+  isActive    Boolean  @default(true) @map("is_active")
   // بداية الأسبوع (الأحد 00:00 UTC) الذي تنتمي إليه هذه الوجبة
   weekStartDate DateTime @map("week_start_date")
   createdAt   DateTime @default(now()) @map("created_at")
@@ -896,6 +904,7 @@ model Product {
   category      String
   imageUrl      String?  @map("image_url")
   stockQuantity Int      @map("stock_quantity")
+  isActive      Boolean  @default(true) @map("is_active")
   createdAt     DateTime @default(now()) @map("created_at")
 
   orderItems ProductOrderItem[]

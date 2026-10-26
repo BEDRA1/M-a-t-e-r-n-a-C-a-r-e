@@ -60,6 +60,7 @@ const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   general: "عام",
   vaccination_reminder: "تذكير بالتلقيحات",
   daily_tip: "نصيحة اليوم",
+  broadcast: "إعلان",
 };
 
 export function notificationTypeLabel(type: NotificationType): string {

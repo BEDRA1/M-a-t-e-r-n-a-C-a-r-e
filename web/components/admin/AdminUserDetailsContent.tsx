@@ -211,7 +211,12 @@ export function AdminUserDetailsContent({ userId }: { userId: string }) {
               <tr key={s.id}>
                 <td className="px-3 py-3 font-semibold">
                   {s.plan.nameAr}
-                  <span className="block text-xs text-emerald-400">{formatDzd(s.plan.price)}</span>
+                  <span className="block text-xs text-emerald-400">
+                    {formatDzd(
+                      s.transactions.filter((t) => t.status === "succeeded").reduce((sum, t) => sum + t.amount, 0) ||
+                        s.plan.price,
+                    )}
+                  </span>
                 </td>
                 <td className="px-3 py-3 text-slate-300">{formatArabicDate(s.startedAt)}</td>
                 <td className="px-3 py-3 text-slate-300">{s.expiresAt ? formatArabicDate(s.expiresAt) : "—"}</td>

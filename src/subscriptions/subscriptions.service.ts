@@ -89,7 +89,10 @@ export class SubscriptionsService {
     await this.expireStaleSubscriptions(userId);
     return this.prisma.userSubscription.findMany({
       where: { userId },
-      include: { plan: true, transactions: true },
+      include: {
+        plan: true,
+        transactions: { select: { id: true, amount: true, paymentMethod: true, status: true, createdAt: true } },
+      },
       orderBy: { createdAt: 'desc' },
     });
   }

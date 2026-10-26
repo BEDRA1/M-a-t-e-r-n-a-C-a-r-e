@@ -36,6 +36,9 @@ import { SpecialistPatientsModule } from './specialist-patients/specialist-patie
 import { AuditLogModule } from './audit-log/audit-log.module';
 import { UsersModule } from './users/users.module';
 import { AdminOrdersModule } from './admin-orders/admin-orders.module';
+import { AdminContentModule } from './admin-content/admin-content.module';
+import { BroadcastModule } from './broadcast/broadcast.module';
+import { AdminExportsModule } from './admin-exports/admin-exports.module';
 import { AuditLogInterceptor } from './audit-log/interceptors/audit-log.interceptor';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -79,6 +82,9 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     AuditLogModule,
     UsersModule,
     AdminOrdersModule,
+    AdminContentModule,
+    BroadcastModule,
+    AdminExportsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -88,7 +88,7 @@ export function CourseCard({ course }: { course: Course }) {
       <div className="relative aspect-video w-full">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={courseCoverImage(track)}
+          src={course.imageUrl || courseCoverImage(track)}
           alt={course.title}
           className="size-full rounded-t-xl object-cover"
         />

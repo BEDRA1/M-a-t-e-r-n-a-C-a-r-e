@@ -4,6 +4,7 @@ import {
   ConsultationType,
   PaymentStatus,
   Prisma,
+  ServiceKind,
   SpecialistStatus,
   SubscriptionStatus,
 } from '@prisma/client';
@@ -42,6 +43,9 @@ export class BookingsService {
 
     const reason = await this.prisma.consultationReason.findUnique({
       where: { id: dto.reasonId },
+    });
+    const pricing = await this.prisma.servicePricing.findUnique({
+      where: { serviceKind_consultationType: { serviceKind: ServiceKind.consultation, consultationType: slot.consultationType } },
     });
     if (!reason || !reason.isActive) {
       throw new AppException(HttpStatus.BAD_REQUEST, {
@@ -89,6 +93,7 @@ export class BookingsService {
             specialistId: slot.specialistId,
             availabilitySlotId: slot.id,
             consultationType: slot.consultationType,
+            price: pricing?.price ?? null,
             reasonId: dto.reasonId,
             questionnaireAnswers: dto.questionnaireAnswers
               ? (dto.questionnaireAnswers as Prisma.InputJsonObject)

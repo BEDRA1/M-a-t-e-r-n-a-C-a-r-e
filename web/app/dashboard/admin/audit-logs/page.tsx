@@ -1,8 +1,5 @@
-import type { Metadata } from "next";
-import { AuditLogContent } from "@/components/dashboard/admin/AuditLogContent";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "سجل النشاط الإداري", robots: { index: false, follow: false } };
-
-export default function AdminAuditLogsPage() {
-  return <AuditLogContent />;
+export default function LegacyAuditLogsPage() {
+  redirect("/admin/audit-logs");
 }
