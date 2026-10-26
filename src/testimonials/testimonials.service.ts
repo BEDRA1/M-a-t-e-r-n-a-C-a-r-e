@@ -29,11 +29,15 @@ export class TestimonialsService {
     });
   }
 
-  listAllForAdmin() {
-    return this.prisma.testimonial.findMany({
+  async listAllForAdmin() {
+    const testimonials = await this.prisma.testimonial.findMany({
       orderBy: { createdAt: 'desc' },
       include: { user: { select: { phone: true, wilaya: true } } },
     });
+    return testimonials.map((t) => ({
+      ...t,
+      status: t.isApproved ? 'approved' : t.reviewedAt ? 'rejected' : 'pending',
+    }));
   }
 
   approve(id: string) {
@@ -52,6 +56,6 @@ export class TestimonialsService {
         en: 'Testimonial not found',
       });
     }
-    return this.prisma.testimonial.update({ where: { id }, data: { isApproved } });
+    return this.prisma.testimonial.update({ where: { id }, data: { isApproved, reviewedAt: new Date() } });
   }
 }

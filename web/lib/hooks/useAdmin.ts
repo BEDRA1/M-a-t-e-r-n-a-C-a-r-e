@@ -1,8 +1,16 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { ApiError, apiGet } from "../api-client";
-import type { Booking, User, UserSubscription } from "../types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ApiError, apiGet, apiPatch } from "../api-client";
+import type {
+  AdminTestimonial,
+  Booking,
+  Specialist,
+  UrgentHelpRequest,
+  UrgentHelpStatus,
+  User,
+  UserSubscription,
+} from "../types";
 
 // شكل المستخدم كما نتوقعه من GET /users للإدارة — عدد الحجوزات اختياري لأن الـBackend
 // قد يُعيده كـ_count (Prisma) أو كحقل مسطّح، أو لا يُعيده إطلاقًا
@@ -65,4 +73,86 @@ export function subscriptionAmount(sub: AdminSubscription): number {
 
 export function userBookingsCount(user: AdminUser): number | null {
   return user._count?.bookingsMade ?? user.bookingsCount ?? null;
+}
+
+// ── طلبات المساعدة العاجلة ──────────────────────────────────────────────────
+
+const URGENT_POLL_MS = 30_000;
+
+/** عدد المفتوحة فقط (بلا بيانات شخصية) — للتنبيه الأحمر وشارة الـsidebar في كل صفحات /admin */
+export function useUrgentOpenCount() {
+  return useQuery({
+    queryKey: ["admin", "urgent-help", "open-count"],
+    queryFn: () => apiGet<{ open: number }>("urgent-help-requests/open-count"),
+    refetchInterval: URGENT_POLL_MS,
+  });
+}
+
+export function useAdminUrgentHelp() {
+  return useQuery({
+    queryKey: ["admin", "urgent-help", "list"],
+    queryFn: () => apiGet<UrgentHelpRequest[]>("urgent-help-requests"),
+    refetchInterval: URGENT_POLL_MS,
+  });
+}
+
+// يُسجَّل في سجل النشاط تلقائيًا (@AuditLog('update_urgent_help_status') على الـendpoint).
+// notes لا تُرسَل عمدًا: الـBackend يكتب فوق ملاحظة الأم إن أُرسلت
+export function useSetUrgentHelpStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: UrgentHelpStatus }) =>
+      apiPatch<UrgentHelpRequest>(`urgent-help-requests/${id}/status`, { status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "urgent-help"] });
+      queryClient.invalidateQueries({ queryKey: ["urgent-help-requests"] });
+    },
+  });
+}
+
+// ── الأخصائيات ──────────────────────────────────────────────────────────────
+
+export interface AdminSpecialist extends Specialist {
+  user?: { id: string; phone: string; wilaya: string | null };
+}
+
+export function useAdminSpecialists() {
+  return useQuery({
+    queryKey: ["admin", "specialists"],
+    queryFn: () => apiGet<AdminSpecialist[]>("admin/specialists"),
+  });
+}
+
+export function useReviewSpecialist() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, decision }: { id: string; decision: "approve" | "reject" }) =>
+      apiPatch<Specialist>(`specialists/${id}/${decision}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "specialists"] });
+      // قائمة الأخصائيات العامة تتغيّر أيضًا بالاعتماد/الرفض
+      queryClient.invalidateQueries({ queryKey: ["specialists"] });
+    },
+  });
+}
+
+// ── آراء المستخدمات ─────────────────────────────────────────────────────────
+
+export function useAdminTestimonials() {
+  return useQuery({
+    queryKey: ["admin", "testimonials"],
+    queryFn: () => apiGet<AdminTestimonial[]>("admin/testimonials"),
+  });
+}
+
+export function useReviewTestimonial() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, decision }: { id: string; decision: "approve" | "reject" }) =>
+      apiPatch<AdminTestimonial>(`admin/testimonials/${id}/${decision}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "testimonials"] });
+      queryClient.invalidateQueries({ queryKey: ["testimonials"] });
+    },
+  });
 }

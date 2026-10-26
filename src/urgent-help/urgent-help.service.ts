@@ -22,16 +22,24 @@ export class UrgentHelpService {
   }
 
   /** مرتبة: open أولاً (الأحدث فالأقدم)، ثم البقية (الأحدث فالأقدم) — لطاقم الأدمن/الأخصائيين */
+  // عدد المفتوحة فقط، بلا أي بيانات شخصية — لشارة/تنبيه الإدارة الذي يُستطلَع كل 30 ثانية من كل صفحات
+  // /admin؛ منفصل عن listAll عمدًا كي لا يُملأ سجل النشاط بإدخال view_urgent_help_requests كل 30 ثانية
+  async countOpen() {
+    const open = await this.prisma.urgentHelpRequest.count({ where: { status: UrgentHelpStatus.open } });
+    return { open };
+  }
+
+  // assessmentResult (الدرجة والتصنيف) مستبعد عمدًا — الهدف هنا الاتصال بالأم لا عرض نتيجة تقييمها النفسي
   async listAll() {
     const [open, rest] = await Promise.all([
       this.prisma.urgentHelpRequest.findMany({
         where: { status: UrgentHelpStatus.open },
-        include: { user: { select: { id: true, phone: true } }, assessmentResult: { select: { id: true, domainId: true, totalScore: true, classification: true } } },
+        include: { user: { select: { id: true, phone: true } } },
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.urgentHelpRequest.findMany({
         where: { status: { not: UrgentHelpStatus.open } },
-        include: { user: { select: { id: true, phone: true } }, assessmentResult: { select: { id: true, domainId: true, totalScore: true, classification: true } } },
+        include: { user: { select: { id: true, phone: true } } },
         orderBy: { createdAt: 'desc' },
       }),
     ]);

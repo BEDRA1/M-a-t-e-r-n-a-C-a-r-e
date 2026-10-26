@@ -1,9 +1,10 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { SpecialistTrack, UserRole } from '@prisma/client';
+import { SpecialistStatus, SpecialistTrack, UserRole } from '@prisma/client';
 import { SpecialistsService } from './specialists.service';
 import { RegisterSpecialistProfileDto } from './dto/register-specialist-profile.dto';
 import { UpdateSpecialistProfileDto } from './dto/update-specialist-profile.dto';
+import { QueryAdminSpecialistsDto } from './dto/query-admin-specialists.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -74,5 +75,23 @@ export class SpecialistsController {
   @ApiOperation({ summary: 'رفض أخصائي (إدارة فقط)' })
   reject(@Param('id') id: string) {
     return this.specialistsService.reject(id);
+  }
+}
+
+// متحكم منفصل بمسار admin/ (نفس نمط admin/testimonials) — لأن GET /specialists/admin كان
+// سيُطابق ':id' الديناميكي في SpecialistsController
+@ApiBearerAuth()
+@ApiTags('admin-specialists')
+@Controller('api/v1/admin/specialists')
+export class AdminSpecialistsController {
+  constructor(private readonly specialistsService: SpecialistsService) {}
+
+  @Get()
+  @Roles(UserRole.admin)
+  @UseGuards(RolesGuard)
+  @ApiQuery({ name: 'status', required: false, enum: SpecialistStatus })
+  @ApiOperation({ summary: 'كل ملفات الأخصائيين بكل حالاتها (الإدارة فقط)، بفلتر status اختياري' })
+  listAll(@Query() query: QueryAdminSpecialistsDto) {
+    return this.specialistsService.listAllForAdmin(query.status);
   }
 }

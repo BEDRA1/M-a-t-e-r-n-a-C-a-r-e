@@ -175,3 +175,63 @@ export function FilterChips<T extends string>({
 
 export const adminInputClass =
   "h-9 rounded-lg border border-slate-700 bg-slate-900 px-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-slate-400 focus:outline-none [color-scheme:dark]";
+
+export function AdminButton({
+  tone = "neutral",
+  className,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { tone?: "neutral" | "positive" | "alert" }) {
+  const toneClass = {
+    neutral: "bg-slate-700 text-slate-100 hover:bg-slate-600",
+    positive: "bg-emerald-600 text-white hover:bg-emerald-500",
+    alert: "bg-red-600 text-white hover:bg-red-500",
+  }[tone];
+  return (
+    <button
+      type="button"
+      {...props}
+      className={cn(
+        "inline-flex h-8 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+        toneClass,
+        className,
+      )}
+    />
+  );
+}
+
+export function ConfirmDialog({
+  open,
+  title,
+  description,
+  confirmLabel,
+  loading,
+  onConfirm,
+  onCancel,
+}: {
+  open: boolean;
+  title: string;
+  description: string;
+  confirmLabel: string;
+  loading?: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+      <button type="button" className="absolute inset-0 bg-black/70" onClick={onCancel} aria-label="إلغاء" />
+      <div className="relative w-full max-w-sm rounded-2xl border border-slate-700 bg-[#1E293B] p-5 shadow-2xl">
+        <h3 className="text-base font-bold text-white">{title}</h3>
+        <p className="mt-2 text-sm leading-relaxed text-slate-300">{description}</p>
+        <div className="mt-5 flex justify-end gap-2">
+          <AdminButton onClick={onCancel} disabled={loading}>
+            إلغاء
+          </AdminButton>
+          <AdminButton tone="alert" onClick={onConfirm} disabled={loading}>
+            {confirmLabel}
+          </AdminButton>
+        </div>
+      </div>
+    </div>
+  );
+}

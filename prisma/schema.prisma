@@ -675,6 +675,8 @@ model Testimonial {
   // الأم بنفسها عند الإرسال (مثلاً "سلمى")، ويُعرض "أم" كافتراضي إن تُرك فارغًا
   displayName String?  @map("display_name")
   isApproved  Boolean  @default(false) @map("is_approved")
+  // null = لم يُراجَع بعد؛ مع isApproved=false يعني "مرفوض" — بدونه لا يمكن التمييز بين الرفض والانتظار
+  reviewedAt  DateTime? @map("reviewed_at")
   createdAt   DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -17,8 +17,8 @@ import {
   useAdminBookings,
   useAdminSubscriptions,
   useAdminUsers,
+  useUrgentOpenCount,
 } from "@/lib/hooks/useAdmin";
-import { useUrgentHelpRequests } from "@/lib/hooks/useUrgentHelp";
 import { bookingStatusLabel, formatArabicDate, formatArabicDateTime, formatDzd, maskPhone, userRoleLabel } from "@/lib/format";
 import { bookingTone } from "@/components/admin/admin-tones";
 
@@ -37,7 +37,7 @@ export function AdminOverviewContent() {
   const users = useAdminUsers();
   const bookings = useAdminBookings();
   const subscriptions = useAdminSubscriptions();
-  const urgent = useUrgentHelpRequests();
+  const urgent = useUrgentOpenCount();
 
   const now = new Date();
   const todayKey = dayKey(now);
@@ -53,7 +53,7 @@ export function AdminOverviewContent() {
     })
     .reduce((sum, s) => sum + subscriptionAmount(s), 0);
 
-  const openUrgent = (urgent.data ?? []).filter((r) => r.status === "open").length;
+  const openUrgent = urgent.data?.open ?? 0;
 
   const chartData = useMemo(() => {
     const counts = new Map<string, number>();

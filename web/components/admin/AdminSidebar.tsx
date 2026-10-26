@@ -3,9 +3,23 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowRight, Calendar, CreditCard, LayoutDashboard, LogOut, Menu, ShieldCheck, Users, X } from "lucide-react";
+import {
+  ArrowRight,
+  Calendar,
+  CreditCard,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  MessageSquareQuote,
+  ShieldCheck,
+  Siren,
+  Stethoscope,
+  Users,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useLogout } from "@/lib/hooks/useAuth";
+import { useUrgentOpenCount } from "@/lib/hooks/useAdmin";
 import type { User } from "@/lib/types";
 
 const NAV_ITEMS = [
@@ -13,6 +27,9 @@ const NAV_ITEMS = [
   { href: "/admin/users", label: "المستخدمون", icon: Users },
   { href: "/admin/bookings", label: "الحجوزات", icon: Calendar },
   { href: "/admin/subscriptions", label: "الاشتراكات", icon: CreditCard },
+  { href: "/admin/urgent-help", label: "طلبات المساعدة", icon: Siren, urgentBadge: true },
+  { href: "/admin/specialists", label: "الأخصائيات", icon: Stethoscope },
+  { href: "/admin/testimonials", label: "الآراء", icon: MessageSquareQuote },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -29,6 +46,7 @@ function SidebarBody({ user, onNavigate }: { user: User; onNavigate?: () => void
   const pathname = usePathname();
   const router = useRouter();
   const logout = useLogout();
+  const urgentOpen = useUrgentOpenCount().data?.open ?? 0;
 
   const handleLogout = async () => {
     await logout.mutateAsync();
@@ -63,6 +81,11 @@ function SidebarBody({ user, onNavigate }: { user: User; onNavigate?: () => void
             >
               <item.icon className="size-[18px]" strokeWidth={2} />
               {item.label}
+              {item.urgentBadge && urgentOpen > 0 && (
+                <span className="ms-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-[11px] font-bold tabular-nums text-white">
+                  {urgentOpen}
+                </span>
+              )}
             </Link>
           );
         })}

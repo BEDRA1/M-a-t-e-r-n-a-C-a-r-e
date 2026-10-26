@@ -24,6 +24,15 @@ export class UrgentHelpController {
     return this.urgentHelpService.createManual(user.userId, dto);
   }
 
+  // مسار حرفي قبل أي ':id' — لا يُسجَّل في سجل النشاط لأنه عدد فقط بلا بيانات شخصية
+  @Get('open-count')
+  @Roles(UserRole.admin)
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'عدد طلبات المساعدة العاجلة المفتوحة (للإدارة — لشارة التنبيه)' })
+  countOpen() {
+    return this.urgentHelpService.countOpen();
+  }
+
   @Get()
   @Roles(UserRole.admin, UserRole.specialist)
   @UseGuards(RolesGuard)

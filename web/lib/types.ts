@@ -202,9 +202,16 @@ export interface Testimonial {
   createdAt: string;
 }
 
+export type TestimonialReviewStatus = "pending" | "approved" | "rejected";
+
 export interface AdminTestimonial extends Testimonial {
   userId: string;
   isApproved: boolean;
+  /** null = لم يُراجَع بعد */
+  reviewedAt?: string | null;
+  /** مشتق في الـBackend من isApproved + reviewedAt */
+  status?: TestimonialReviewStatus;
+  user?: { phone: string; wilaya: string | null };
 }
 
 export interface FaqCategory {

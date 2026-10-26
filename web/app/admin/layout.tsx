@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/server/get-current-user";
 import { AdminHeader, AdminSidebar } from "@/components/admin/AdminSidebar";
+import { UrgentHelpBanner } from "@/components/admin/UrgentHelpBanner";
 
 export const metadata: Metadata = {
   title: { default: "لوحة الإدارة", template: "%s | إدارة Materna Care" },
@@ -26,6 +27,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <AdminSidebar user={user} />
       <div className="flex min-w-0 flex-1 flex-col">
         <AdminHeader user={user} />
+        <UrgentHelpBanner />
         <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
       </div>
     </div>

@@ -40,6 +40,15 @@ export class SpecialistsService {
     return specialists.sort((a, b) => priority(a.fullName) - priority(b.fullName));
   }
 
+  // كل الملفات بكل حالاتها (pending/approved/rejected) — listApproved يُخفي غير المعتمدين عمدًا
+  listAllForAdmin(status?: SpecialistStatus) {
+    return this.prisma.specialist.findMany({
+      where: status ? { status } : {},
+      include: { user: { select: { id: true, phone: true, wilaya: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async getById(id: string, requester?: AuthenticatedUser) {
     const specialist = await this.prisma.specialist.findUnique({
       where: { id },
