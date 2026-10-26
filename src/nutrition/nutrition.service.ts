@@ -60,6 +60,15 @@ export class NutritionService {
     });
   }
 
+  // الأحدث أولًا — مع هاتف صاحبة الطلب (للاتصال) فقط من بيانات المستخدم
+  listAllOrdersForAdmin(status?: MealOrderStatus) {
+    return this.prisma.mealOrder.findMany({
+      where: status ? { status } : {},
+      include: { user: { select: { id: true, phone: true } }, items: { include: { meal: { select: { id: true, name: true, mealType: true, dayOfWeek: true } } } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   listMine(userId: string) {
     return this.prisma.mealOrder.findMany({
       where: { userId },

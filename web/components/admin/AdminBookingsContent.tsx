@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  AdminButton,
   AdminPageHeader,
   AdminPanel,
   AdminTable,
@@ -11,10 +12,11 @@ import {
   StatusPill,
   TableMessageRow,
   TableSkeletonRows,
+  ConfirmDialog,
   adminInputClass,
 } from "@/components/admin/AdminUi";
 import { bookingTone } from "@/components/admin/admin-tones";
-import { isMissingEndpoint, useAdminBookings } from "@/lib/hooks/useAdmin";
+import { isMissingEndpoint, useAdminBookings, useCancelBooking, type AdminBooking } from "@/lib/hooks/useAdmin";
 import { bookingStatusLabel, consultationTypeLabel, formatArabicDateTime, maskPhone } from "@/lib/format";
 import type { BookingStatus } from "@/lib/types";
 
@@ -28,7 +30,7 @@ const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "cancelled", label: bookingStatusLabel("cancelled") },
 ];
 
-const HEAD = ["هاتف الأم", "الأخصائية", "التاريخ والوقت", "النوع", "الحالة"];
+const HEAD = ["هاتف الأم", "الأخصائية", "التاريخ والوقت", "النوع", "الحالة", "إجراءات"];
 
 /** YYYY-MM-DD بالتوقيت المحلي، للمقارنة مع قيمة input[type=date] */
 function localDateKey(iso: string): string {
@@ -42,6 +44,8 @@ export function AdminBookingsContent() {
   const [status, setStatus] = useState<StatusFilter>("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const cancelBooking = useCancelBooking();
+  const [toCancel, setToCancel] = useState<AdminBooking | null>(null);
 
   const rows = (bookings.data ?? [])
     .map((b) => ({ ...b, when: b.availabilitySlot?.startTime ?? b.createdAt }))
@@ -56,6 +60,8 @@ export function AdminBookingsContent() {
         title="الحجوزات"
         description={bookings.data ? `${bookings.data.length.toLocaleString("ar-DZ")} حجز` : "كل حجوزات الاستشارات"}
       />
+
+      {cancelBooking.error && <ErrorNotice message={cancelBooking.error.message} />}
 
       <AdminPanel>
         <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -102,12 +108,33 @@ export function AdminBookingsContent() {
                   <td className="px-3 py-3">
                     <StatusPill tone={bookingTone(b.status)}>{bookingStatusLabel(b.status)}</StatusPill>
                   </td>
+                  <td className="px-3 py-3">
+                    {(b.status === "pending" || b.status === "confirmed") && (
+                      <AdminButton tone="alert" disabled={cancelBooking.isPending} onClick={() => setToCancel(b)}>
+                        إلغاء الحجز
+                      </AdminButton>
+                    )}
+                  </td>
                 </tr>
               ))
             )}
           </AdminTable>
         )}
       </AdminPanel>
+
+      <ConfirmDialog
+        open={toCancel !== null}
+        title="إلغاء الحجز؟"
+        description={
+          toCancel
+            ? `سيُلغى حجز الأم مع ${toCancel.specialist?.fullName ?? "الأخصائية"} نهائيًا، وتعود الفترة الزمنية متاحة للحجز من جديد.`
+            : ""
+        }
+        confirmLabel="تأكيد الإلغاء"
+        loading={cancelBooking.isPending}
+        onConfirm={() => toCancel && cancelBooking.mutate(toCancel.id, { onSettled: () => setToCancel(null) })}
+        onCancel={() => setToCancel(null)}
+      />
     </div>
   );
 }

@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { StoreService } from './store.service';
 import { CreateProductOrderDto } from './dto/create-product-order.dto';
 import { UpdateProductOrderStatusDto } from './dto/update-product-order-status.dto';
+import { QueryProductOrdersDto } from './dto/query-product-orders.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -22,6 +23,15 @@ export class ProductOrdersController {
   @ApiOperation({ summary: 'طلب منتجات — السعر يُحسب من الخادم والمخزون يُخصم ذريًا' })
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateProductOrderDto) {
     return this.storeService.createOrder(user.userId, dto);
+  }
+
+  // GET الجذر لا يتعارض مع ':id' ولا 'mine'
+  @Get()
+  @Roles(UserRole.admin)
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'كل طلبات المتجر (admin فقط)، بفلتر status اختياري' })
+  listAll(@Query() query: QueryProductOrdersDto) {
+    return this.storeService.listAllOrdersForAdmin(query.status);
   }
 
   @Get('mine')

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { AlertOctagon, CalendarCheck, Users, Wallet } from "lucide-react";
+import { AlertOctagon, CalendarCheck, ShoppingBag, Users, Wallet } from "lucide-react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
   AdminPageHeader,
@@ -16,6 +16,7 @@ import {
   subscriptionAmount,
   useAdminBookings,
   useAdminSubscriptions,
+  useAdminOrderCounts,
   useAdminUsers,
   useUrgentOpenCount,
 } from "@/lib/hooks/useAdmin";
@@ -38,6 +39,7 @@ export function AdminOverviewContent() {
   const bookings = useAdminBookings();
   const subscriptions = useAdminSubscriptions();
   const urgent = useUrgentOpenCount();
+  const orderCounts = useAdminOrderCounts();
 
   const now = new Date();
   const todayKey = dayKey(now);
@@ -81,7 +83,7 @@ export function AdminOverviewContent() {
     <div className="flex flex-col gap-6">
       <AdminPageHeader title="لوحة التحكم" description="نظرة عامة على نشاط المنصة" />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <StatCard
           label="إجمالي المستخدمين"
           icon={Users}
@@ -112,6 +114,18 @@ export function AdminOverviewContent() {
           loading={urgent.isLoading}
           value={valueOrDash(urgent, openUrgent.toLocaleString("ar-DZ"))}
           hint="غير معالجة بعد"
+        />
+        <StatCard
+          label="طلبات جديدة تنتظر"
+          icon={ShoppingBag}
+          tone={(orderCounts.data?.total ?? 0) > 0 ? "warning" : "neutral"}
+          loading={orderCounts.isLoading}
+          value={valueOrDash(orderCounts, (orderCounts.data?.total ?? 0).toLocaleString("ar-DZ"))}
+          hint={
+            orderCounts.data
+              ? `وجبات ${orderCounts.data.mealOrders} · متجر ${orderCounts.data.productOrders} · خدمات ${orderCounts.data.serviceBookings}`
+              : undefined
+          }
         />
       </div>
 

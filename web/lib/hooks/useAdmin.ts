@@ -5,6 +5,9 @@ import { ApiError, apiGet, apiPatch } from "../api-client";
 import type {
   AdminTestimonial,
   Booking,
+  MealOrder,
+  ProductOrder,
+  ServiceBooking,
   Specialist,
   UrgentHelpRequest,
   UrgentHelpStatus,
@@ -153,6 +156,68 @@ export function useReviewTestimonial() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "testimonials"] });
       queryClient.invalidateQueries({ queryKey: ["testimonials"] });
+    },
+  });
+}
+
+// ── الطلبات: الوجبات، المتجر، الخدمات المنزلية ──────────────────────────────
+
+type OrderOwner = { user?: { id: string; phone: string } };
+export type AdminMealOrder = MealOrder & OrderOwner;
+export type AdminProductOrder = ProductOrder & OrderOwner;
+export type AdminServiceBooking = ServiceBooking & OrderOwner;
+
+export type OrderKind = "meal-orders" | "product-orders" | "service-bookings";
+
+export function useAdminMealOrders() {
+  return useQuery(adminListQuery<AdminMealOrder>("meal-orders", "meal-orders"));
+}
+
+export function useAdminProductOrders() {
+  return useQuery(adminListQuery<AdminProductOrder>("product-orders", "product-orders"));
+}
+
+export function useAdminServiceBookings() {
+  return useQuery(adminListQuery<AdminServiceBooking>("service-bookings", "service-bookings"));
+}
+
+export interface AdminOrderCounts {
+  mealOrders: number;
+  productOrders: number;
+  serviceBookings: number;
+  total: number;
+}
+
+/** عدد الطلبات الجديدة (pending) لكل نوع — لشارات الـsidebar وبطاقة الصفحة الرئيسية */
+export function useAdminOrderCounts() {
+  return useQuery({
+    queryKey: ["admin", "order-counts"],
+    queryFn: () => apiGet<AdminOrderCounts>("admin/order-counts"),
+    refetchInterval: 60_000,
+  });
+}
+
+// يمر عبر PATCH /:id/status الموجود لكل نوع (admin فقط + @AuditLog) — قواعد الانتقال تُفرض في الـBackend،
+// وإلغاء طلب متجر يُعيد المخزون هناك (restoreStockAndCancel)
+export function useSetOrderStatus(kind: OrderKind) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) => apiPatch<{ id: string }>(`${kind}/${id}/status`, { status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", kind] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "order-counts"] });
+    },
+  });
+}
+
+// PATCH status=cancelled لا POST /cancel: الأول مسجَّل في سجل النشاط (update_booking_status) والثاني لا،
+// وكلاهما يحرّر فتحة الأخصائية عبر releaseSlotAndCancel
+export function useCancelBooking() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiPatch<Booking>(`bookings/${id}/status`, { status: "cancelled" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "bookings"] });
     },
   });
 }

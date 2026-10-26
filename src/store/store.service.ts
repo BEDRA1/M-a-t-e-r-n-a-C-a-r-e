@@ -86,6 +86,15 @@ export class StoreService {
     });
   }
 
+  // الأحدث أولًا — مع هاتف صاحبة الطلب (للاتصال) فقط من بيانات المستخدم
+  listAllOrdersForAdmin(status?: ProductOrderStatus) {
+    return this.prisma.productOrder.findMany({
+      where: status ? { status } : {},
+      include: { user: { select: { id: true, phone: true } }, items: { include: { product: { select: { id: true, name: true, category: true } } } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   listMine(userId: string) {
     return this.prisma.productOrder.findMany({
       where: { userId },

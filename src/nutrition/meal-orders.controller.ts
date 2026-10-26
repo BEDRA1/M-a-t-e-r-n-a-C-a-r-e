@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { NutritionService } from './nutrition.service';
 import { CreateMealOrderDto } from './dto/create-meal-order.dto';
 import { UpdateMealOrderStatusDto } from './dto/update-meal-order-status.dto';
+import { QueryMealOrdersDto } from './dto/query-meal-orders.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -22,6 +23,15 @@ export class MealOrdersController {
   @ApiOperation({ summary: 'طلب وجبات — السعر الإجمالي يُحسب دومًا من الخادم' })
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateMealOrderDto) {
     return this.nutritionService.createOrder(user.userId, dto);
+  }
+
+  // GET الجذر لا يتعارض مع ':id' ولا 'mine'
+  @Get()
+  @Roles(UserRole.admin)
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'كل طلبات الوجبات (admin فقط)، بفلتر status اختياري' })
+  listAll(@Query() query: QueryMealOrdersDto) {
+    return this.nutritionService.listAllOrdersForAdmin(query.status);
   }
 
   @Get('mine')

@@ -13,13 +13,16 @@ import {
   MessageSquareQuote,
   ShieldCheck,
   Siren,
+  ShoppingBag,
   Stethoscope,
+  HeartHandshake,
+  UtensilsCrossed,
   Users,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useLogout } from "@/lib/hooks/useAuth";
-import { useUrgentOpenCount } from "@/lib/hooks/useAdmin";
+import { useAdminOrderCounts, useUrgentOpenCount, type AdminOrderCounts } from "@/lib/hooks/useAdmin";
 import type { User } from "@/lib/types";
 
 const NAV_ITEMS = [
@@ -31,6 +34,21 @@ const NAV_ITEMS = [
   { href: "/admin/specialists", label: "الأخصائيات", icon: Stethoscope },
   { href: "/admin/testimonials", label: "الآراء", icon: MessageSquareQuote },
 ];
+
+const ORDER_ITEMS: { href: string; label: string; icon: typeof ShoppingBag; countKey: keyof AdminOrderCounts }[] = [
+  { href: "/admin/meal-orders", label: "الوجبات", icon: UtensilsCrossed, countKey: "mealOrders" },
+  { href: "/admin/product-orders", label: "المتجر", icon: ShoppingBag, countKey: "productOrders" },
+  { href: "/admin/service-bookings", label: "الخدمات المنزلية", icon: HeartHandshake, countKey: "serviceBookings" },
+];
+
+function NavBadge({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <span className="ms-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-[11px] font-bold tabular-nums text-white">
+      {count}
+    </span>
+  );
+}
 
 function isActive(pathname: string, href: string): boolean {
   // "/admin" يطابق نفسه فقط، وإلا سيبقى نشطًا في كل الصفحات الفرعية
@@ -47,6 +65,7 @@ function SidebarBody({ user, onNavigate }: { user: User; onNavigate?: () => void
   const router = useRouter();
   const logout = useLogout();
   const urgentOpen = useUrgentOpenCount().data?.open ?? 0;
+  const orderCounts = useAdminOrderCounts().data;
 
   const handleLogout = async () => {
     await logout.mutateAsync();
@@ -66,7 +85,7 @@ function SidebarBody({ user, onNavigate }: { user: User; onNavigate?: () => void
         </div>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1 p-3">
+      <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
         {NAV_ITEMS.map((item) => {
           const active = isActive(pathname, item.href);
           return (
@@ -81,11 +100,27 @@ function SidebarBody({ user, onNavigate }: { user: User; onNavigate?: () => void
             >
               <item.icon className="size-[18px]" strokeWidth={2} />
               {item.label}
-              {item.urgentBadge && urgentOpen > 0 && (
-                <span className="ms-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-[11px] font-bold tabular-nums text-white">
-                  {urgentOpen}
-                </span>
+              {item.urgentBadge && <NavBadge count={urgentOpen} />}
+            </Link>
+          );
+        })}
+
+        <p className="mt-4 px-3 pb-1 text-xs font-semibold text-slate-500">الطلبات</p>
+        {ORDER_ITEMS.map((item) => {
+          const active = isActive(pathname, item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={onNavigate}
+              className={cn(
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors",
+                active ? "bg-slate-100 text-slate-900" : "text-slate-300 hover:bg-slate-700/50 hover:text-white",
               )}
+            >
+              <item.icon className="size-[18px]" strokeWidth={2} />
+              {item.label}
+              <NavBadge count={orderCounts?.[item.countKey] ?? 0} />
             </Link>
           );
         })}

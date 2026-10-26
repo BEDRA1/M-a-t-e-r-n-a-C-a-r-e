@@ -44,6 +44,15 @@ export class HomeServicesService {
     });
   }
 
+  // الأحدث أولًا — مع هاتف صاحبة الطلب (للاتصال) فقط من بيانات المستخدم
+  listAllBookingsForAdmin(status?: ServiceBookingStatus) {
+    return this.prisma.serviceBooking.findMany({
+      where: status ? { status } : {},
+      include: { user: { select: { id: true, phone: true } }, service: { select: { id: true, name: true, category: true, basePrice: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   listMine(userId: string) {
     return this.prisma.serviceBooking.findMany({
       where: { userId },

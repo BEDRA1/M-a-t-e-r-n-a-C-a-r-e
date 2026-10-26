@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { HomeServicesService } from './home-services.service';
 import { CreateServiceBookingDto } from './dto/create-service-booking.dto';
 import { UpdateServiceBookingStatusDto } from './dto/update-service-booking-status.dto';
+import { QueryServiceBookingsDto } from './dto/query-service-bookings.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -22,6 +23,15 @@ export class ServiceBookingsController {
   @ApiOperation({ summary: 'حجز خدمة منزلية' })
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateServiceBookingDto) {
     return this.homeServicesService.createBooking(user.userId, dto);
+  }
+
+  // GET الجذر لا يتعارض مع ':id' ولا 'mine'
+  @Get()
+  @Roles(UserRole.admin)
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'كل حجوزات الخدمات المنزلية (admin فقط)، بفلتر status اختياري' })
+  listAll(@Query() query: QueryServiceBookingsDto) {
+    return this.homeServicesService.listAllBookingsForAdmin(query.status);
   }
 
   @Get('mine')
