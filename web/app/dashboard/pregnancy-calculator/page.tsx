@@ -1,11 +1,5 @@
-import type { Metadata } from "next";
-import { PregnancyCalculatorPageContent } from "./PregnancyCalculatorPageContent";
-
-export const metadata: Metadata = {
-  title: "حاسبة الحمل",
-  robots: { index: false, follow: false },
-};
+import { redirect } from "next/navigation";
 
 export default function PregnancyCalculatorPage() {
-  return <PregnancyCalculatorPageContent />;
+  redirect("/dashboard/weekly-tracking");
 }

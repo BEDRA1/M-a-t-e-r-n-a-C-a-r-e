@@ -1,5 +1,6 @@
 "use client";
 
+import { lmpInputBounds } from "@/lib/pregnancy-stage";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -76,6 +77,7 @@ export function RegisterForm() {
   const [step1Values, setStep1Values] = useState<RegisterFormValues | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [stage, setStage] = useState<MaternityStage | null>(null);
+  const [lmpBounds] = useState(() => lmpInputBounds());
   const [isSubmittingStage2, setIsSubmittingStage2] = useState(false);
 
   const [pregnant, setPregnant] = useState<PregnantData>({
@@ -132,7 +134,13 @@ export function RegisterForm() {
 
   const stageValid = (() => {
     if (!stage) return false;
-    if (stage === "pregnant") return Boolean(pregnant.lmpDate) && pregnant.isFirst !== null;
+    if (stage === "pregnant")
+      return (
+        Boolean(pregnant.lmpDate) &&
+        pregnant.lmpDate >= lmpBounds.min &&
+        pregnant.lmpDate <= lmpBounds.max &&
+        pregnant.isFirst !== null
+      );
     if (stage === "postpartum")
       return (
         Boolean(postpartum.birthDate) &&
@@ -192,7 +200,10 @@ export function RegisterForm() {
         });
       }
     } catch {
-      // متعمّد: يُتجاهَل بصمت — الحساب موجود، والدخول لا يجب أن يُحجَب بسبب هذه الخطوة
+      // الحساب موجود فلا يُحجَب الدخول، لكن توجَّه الأم لصفحة تُكمل منها البيانات بدل لوحة بلا سجل
+      router.push(stage === "newborn" ? "/dashboard/baby" : "/dashboard/weekly-tracking");
+      router.refresh();
+      return;
     }
 
     router.push("/dashboard");
@@ -249,6 +260,8 @@ export function RegisterForm() {
             <Input
               label="تاريخ آخر دورة شهرية"
               type="date"
+              min={lmpBounds.min}
+              max={lmpBounds.max}
               value={pregnant.lmpDate}
               onChange={(e) => setPregnant((p) => ({ ...p, lmpDate: e.target.value }))}
             />

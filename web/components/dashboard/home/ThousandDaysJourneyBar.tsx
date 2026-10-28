@@ -95,7 +95,7 @@ export function ThousandDaysJourneyBar() {
         <>
           <div className="h-4 w-full rounded-full bg-gray-100" />
           <Link
-            href="/dashboard/pregnancy-calculator"
+            href="/dashboard/weekly-tracking"
             className="mt-3 block rounded-xl bg-primary-50 py-2.5 text-center text-xs font-bold text-primary-700"
           >
             سجّلي رحلتك

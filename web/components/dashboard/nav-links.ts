@@ -6,7 +6,6 @@ import {
   BookOpen,
   Bot,
   Brain,
-  Calculator,
   CalendarDays,
   CircleUser,
   ClipboardCheck,
@@ -79,8 +78,7 @@ export const dashboardNavItems: DashboardNavItem[] = [
     label: "الحمل",
     icon: HeartPulse,
     children: [
-      { href: "/dashboard/pregnancy-calculator", label: "حاسبة الحمل", icon: Calculator },
-      { href: "/dashboard/weekly-tracking", label: "المتابعة الأسبوعية", icon: CalendarDays },
+      { href: "/dashboard/weekly-tracking", label: "متابعة حملي", icon: CalendarDays },
       { href: "/dashboard/reminders", label: "التذكيرات", icon: Pill },
     ],
   },

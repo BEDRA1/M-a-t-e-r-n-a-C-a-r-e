@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { useCreatePregnancy } from "@/lib/hooks/usePregnancy";
+import { useCreatePregnancy, useUpdatePregnancy, type CreatePregnancyInput } from "@/lib/hooks/usePregnancy";
+import { lmpInputBounds } from "@/lib/pregnancy-stage";
 import { ApiError } from "@/lib/api-client";
 import { formatArabicDate } from "@/lib/format";
 import {
@@ -20,14 +21,29 @@ import {
 } from "@/lib/validation/pregnancy";
 import type { Pregnancy, PregnancyCalcMethod } from "@/lib/types";
 
+type Mode = "create" | "edit";
+
+/** إنشاء حمل جديد (POST) أو تصحيح تاريخ الحمل النشط (PATCH) — نفس النماذج الثلاثة */
+function useSavePregnancy(mode: Mode) {
+  const create = useCreatePregnancy();
+  const update = useUpdatePregnancy();
+  const mutation = mode === "create" ? create : update;
+  return {
+    isPending: mutation.isPending,
+    save: (input: CreatePregnancyInput): Promise<Pregnancy> =>
+      mode === "create" ? create.mutateAsync(input) : update.mutateAsync(input),
+  };
+}
+
 const tabs: { id: PregnancyCalcMethod; label: string }[] = [
   { id: "lmp", label: "آخر دورة شهرية" },
   { id: "ovulation", label: "تاريخ الإباضة" },
   { id: "ultrasound", label: "فحص السونار" },
 ];
 
-function LmpForm({ onResult }: { onResult: (p: Pregnancy) => void }) {
-  const createPregnancy = useCreatePregnancy();
+function LmpForm({ onResult, mode }: { onResult: (p: Pregnancy) => void; mode: Mode }) {
+  const createPregnancy = useSavePregnancy(mode);
+  const bounds = lmpInputBounds();
   const [serverError, setServerError] = useState<string | null>(null);
   const {
     register,
@@ -38,7 +54,7 @@ function LmpForm({ onResult }: { onResult: (p: Pregnancy) => void }) {
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
     try {
-      const result = await createPregnancy.mutateAsync({ calcMethod: "lmp", ...values });
+      const result = await createPregnancy.save({ calcMethod: "lmp", ...values });
       onResult(result);
     } catch (err) {
       setServerError(err instanceof ApiError ? err.message : "تعذّر حساب الحمل");
@@ -51,18 +67,21 @@ function LmpForm({ onResult }: { onResult: (p: Pregnancy) => void }) {
       <Input
         label="تاريخ أول يوم من آخر دورة شهرية"
         type="date"
+        min={bounds.min}
+        max={bounds.max}
         error={errors.lmpDate?.message}
         {...register("lmpDate")}
       />
       <Button type="submit" loading={createPregnancy.isPending}>
-        احسبي الآن
+        {mode === "edit" ? "حفظ التاريخ الجديد" : "احسبي الآن"}
       </Button>
     </form>
   );
 }
 
-function OvulationForm({ onResult }: { onResult: (p: Pregnancy) => void }) {
-  const createPregnancy = useCreatePregnancy();
+function OvulationForm({ onResult, mode }: { onResult: (p: Pregnancy) => void; mode: Mode }) {
+  const createPregnancy = useSavePregnancy(mode);
+  const bounds = lmpInputBounds();
   const [serverError, setServerError] = useState<string | null>(null);
   const {
     register,
@@ -73,7 +92,7 @@ function OvulationForm({ onResult }: { onResult: (p: Pregnancy) => void }) {
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
     try {
-      const result = await createPregnancy.mutateAsync({ calcMethod: "ovulation", ...values });
+      const result = await createPregnancy.save({ calcMethod: "ovulation", ...values });
       onResult(result);
     } catch (err) {
       setServerError(err instanceof ApiError ? err.message : "تعذّر حساب الحمل");
@@ -86,18 +105,21 @@ function OvulationForm({ onResult }: { onResult: (p: Pregnancy) => void }) {
       <Input
         label="تاريخ الإباضة أو الإخصاب"
         type="date"
+        min={bounds.min}
+        max={bounds.max}
         error={errors.conceptionDate?.message}
         {...register("conceptionDate")}
       />
       <Button type="submit" loading={createPregnancy.isPending}>
-        احسبي الآن
+        {mode === "edit" ? "حفظ التاريخ الجديد" : "احسبي الآن"}
       </Button>
     </form>
   );
 }
 
-function UltrasoundForm({ onResult }: { onResult: (p: Pregnancy) => void }) {
-  const createPregnancy = useCreatePregnancy();
+function UltrasoundForm({ onResult, mode }: { onResult: (p: Pregnancy) => void; mode: Mode }) {
+  const createPregnancy = useSavePregnancy(mode);
+  const bounds = lmpInputBounds();
   const [serverError, setServerError] = useState<string | null>(null);
   const {
     register,
@@ -110,7 +132,7 @@ function UltrasoundForm({ onResult }: { onResult: (p: Pregnancy) => void }) {
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
     try {
-      const result = await createPregnancy.mutateAsync({
+      const result = await createPregnancy.save({
         calcMethod: "ultrasound",
         ultrasoundDate: values.ultrasoundDate,
         ultrasoundWeeks: Number(values.ultrasoundWeeks),
@@ -127,6 +149,8 @@ function UltrasoundForm({ onResult }: { onResult: (p: Pregnancy) => void }) {
       <Input
         label="تاريخ فحص السونار"
         type="date"
+        min={bounds.min}
+        max={bounds.max}
         error={errors.ultrasoundDate?.message}
         {...register("ultrasoundDate")}
       />
@@ -140,7 +164,7 @@ function UltrasoundForm({ onResult }: { onResult: (p: Pregnancy) => void }) {
         {...register("ultrasoundWeeks")}
       />
       <Button type="submit" loading={createPregnancy.isPending}>
-        احسبي الآن
+        {mode === "edit" ? "حفظ التاريخ الجديد" : "احسبي الآن"}
       </Button>
     </form>
   );
@@ -155,7 +179,7 @@ function ResultPanel({ result }: { result: Pregnancy | null }) {
         </span>
         <p className="text-sm">
           ستظهر هنا نتيجة الحساب: عمر حملك وتاريخ ولادتك المتوقع، بمجرد إدخال البيانات
-          وضغط "احسبي الآن".
+          وضغط «احسبي الآن».
         </p>
       </Card>
     );
@@ -183,12 +207,15 @@ function ResultPanel({ result }: { result: Pregnancy | null }) {
   );
 }
 
-export function PregnancyCalculatorForm() {
+export function PregnancyCalculatorForm({ mode = "create", onDone }: { mode?: Mode; onDone?: (p: Pregnancy) => void }) {
   const [activeTab, setActiveTab] = useState<PregnancyCalcMethod>("lmp");
   const [result, setResult] = useState<Pregnancy | null>(null);
+  const handleResult = (p: Pregnancy) => {
+    setResult(p);
+    onDone?.(p);
+  };
 
-  return (
-    <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+  const tabsCard = (
       <Card>
         <div className="flex flex-wrap gap-2">
           {tabs.map((tab) => (
@@ -209,12 +236,18 @@ export function PregnancyCalculatorForm() {
         </div>
 
         <div className="mt-6">
-          {activeTab === "lmp" && <LmpForm onResult={setResult} />}
-          {activeTab === "ovulation" && <OvulationForm onResult={setResult} />}
-          {activeTab === "ultrasound" && <UltrasoundForm onResult={setResult} />}
+          {activeTab === "lmp" && <LmpForm mode={mode} onResult={handleResult} />}
+          {activeTab === "ovulation" && <OvulationForm mode={mode} onResult={handleResult} />}
+          {activeTab === "ultrasound" && <UltrasoundForm mode={mode} onResult={handleResult} />}
         </div>
       </Card>
+  );
 
+  if (mode === "edit") return tabsCard;
+
+  return (
+    <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+      {tabsCard}
       <ResultPanel result={result} />
     </div>
   );

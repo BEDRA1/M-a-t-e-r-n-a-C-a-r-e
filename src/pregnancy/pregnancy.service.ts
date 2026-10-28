@@ -24,6 +24,7 @@ export class PregnancyService {
       });
     }
 
+    this.assertDatesNotInFuture(dto);
     const { dueDate } = this.computeDueDate(dto);
 
     const pregnancy = await this.prisma.pregnancy.create({
@@ -80,6 +81,7 @@ export class PregnancyService {
       ultrasoundWeeks: dto.ultrasoundWeeks ?? pregnancy.ultrasoundWeeks ?? undefined,
     };
 
+    this.assertDatesNotInFuture(dto);
     const recalcInputsProvided =
       dto.calcMethod || dto.lmpDate || dto.conceptionDate || dto.ultrasoundDate || dto.ultrasoundWeeks;
     const dueDate = recalcInputsProvided ? this.computeDueDate(merged).dueDate : pregnancy.dueDate;
@@ -228,6 +230,25 @@ export class PregnancyService {
       });
     }
     return log;
+  }
+
+  // تاريخ مستقبلي يعطي عمر حمل 0 وتاريخ ولادة خاطئ — وُجدت سجلات كهذه من نموذج التسجيل.
+  // هامش يوم واحد لأن "YYYY-MM-DD" يُقرأ منتصف ليل UTC بينما الجزائر UTC+1
+  private assertDatesNotInFuture(dto: { lmpDate?: string; conceptionDate?: string; ultrasoundDate?: string }) {
+    const limit = Date.now() + 24 * 60 * 60 * 1000;
+    const labels: [string | undefined, string, string][] = [
+      [dto.lmpDate, 'تاريخ آخر دورة شهرية', 'LMP date'],
+      [dto.conceptionDate, 'تاريخ الإباضة', 'Conception date'],
+      [dto.ultrasoundDate, 'تاريخ السونار', 'Ultrasound date'],
+    ];
+    for (const [value, ar, en] of labels) {
+      if (value && new Date(value).getTime() > limit) {
+        throw new AppException(HttpStatus.BAD_REQUEST, {
+          ar: `${ar} لا يمكن أن يكون في المستقبل`,
+          en: `${en} cannot be in the future`,
+        });
+      }
+    }
   }
 
   private computeDueDate(dto: {

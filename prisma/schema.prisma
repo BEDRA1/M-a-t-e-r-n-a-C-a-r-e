@@ -260,6 +260,8 @@ model PregnancyWeekContent {
   bodyChangesText    String @map("body_changes_text")
   tipsJson           Json   @map("tips_json")
   developmentJson    Json   @map("development_json")
+  // متى يجب مراجعة الطبيبة — علامات خطر مناسبة لمرحلة الأسبوع
+  warningSignsJson   Json   @default("[]") @map("warning_signs_json")
 
   @@map("pregnancy_week_content")
 }

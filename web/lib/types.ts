@@ -54,6 +54,7 @@ export interface WeekContent {
   bodyChangesText: string;
   tipsJson: string[];
   developmentJson: { points?: string[] };
+  warningSignsJson?: string[];
 }
 
 export type ReminderType = "vitamin" | "medication" | "water" | "appointment" | "other";

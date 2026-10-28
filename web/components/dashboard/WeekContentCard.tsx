@@ -1,6 +1,6 @@
 "use client";
 
-import { Baby, Check, Info } from "lucide-react";
+import { AlertTriangle, Baby, Check, Info } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -50,7 +50,8 @@ export function WeekContentCard({ weekNumber }: { weekNumber: number }) {
           </p>
         )}
 
-        <p className="mt-4 text-sm leading-relaxed text-foreground">{content.bodyChangesText}</p>
+        <h3 className="mt-4 text-sm font-bold text-foreground">تغيرات جسمك هذا الأسبوع</h3>
+        <p className="mt-1.5 text-sm leading-relaxed text-foreground">{content.bodyChangesText}</p>
 
         {content.developmentJson?.points && content.developmentJson.points.length > 0 && (
           <div className="mt-5 border-t border-black/5 pt-4">
@@ -86,12 +87,27 @@ export function WeekContentCard({ weekNumber }: { weekNumber: number }) {
           </div>
         )}
 
-        <div className="mt-5 flex items-start gap-2 rounded-xl bg-black/[0.03] px-3.5 py-3">
-          <Info className="mt-0.5 size-4 shrink-0 text-muted" strokeWidth={2} />
-          <p className="text-xs leading-relaxed text-muted">
-            هذا المحتوى تثقيفي عام ولا يُغني عن استشارة طبيبك. إن شعرتِ بأي أعراض غير معتادة، راجعي طبيبك مباشرة.
-          </p>
-        </div>
+        {(content.warningSignsJson?.length ?? 0) > 0 && (
+          <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3">
+            <h3 className="flex items-center gap-1.5 text-sm font-bold text-red-700">
+              <AlertTriangle className="size-4" strokeWidth={2} />
+              متى تراجعين الطبيبة فورًا؟
+            </h3>
+            <ul className="mt-2 flex flex-col gap-1.5">
+              {content.warningSignsJson!.map((sign, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-red-800">
+                  <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-red-400" />
+                  <span>{sign}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <p className="mt-4 flex items-center gap-1.5 text-xs text-muted">
+          <Info className="size-3.5 shrink-0" strokeWidth={2} />
+          معلومات عامة لا تغني عن استشارة الطبيبة أو القابلة
+        </p>
       </Card>
     </motion.div>
   );

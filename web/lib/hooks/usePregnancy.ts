@@ -16,7 +16,8 @@ export interface CreatePregnancyInput {
   healthConditionNote?: string;
 }
 
-export interface UpdatePregnancyInput {
+// تعديل تاريخ الحمل (calcMethod + تاريخ) يعيد الـBackend حساب موعد الولادة
+export interface UpdatePregnancyInput extends Partial<CreatePregnancyInput> {
   status?: "active" | "completed" | "ended";
   birthDate?: string;
   deliveryType?: "natural" | "cesarean";

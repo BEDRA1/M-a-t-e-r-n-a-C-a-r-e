@@ -15,7 +15,7 @@ export function WelcomeBanner() {
           </p>
           <p className="mt-1 text-sm text-gray-500">من الحمل حتى أول سنتين</p>
           <Link
-            href="/dashboard/pregnancy-calculator"
+            href="/dashboard/weekly-tracking"
             className="mt-3 inline-block rounded-full bg-primary-500 px-4 py-2 text-sm text-white"
           >
             استكشفي المزيد
